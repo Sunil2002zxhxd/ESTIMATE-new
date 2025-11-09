@@ -8,6 +8,9 @@
     body {
       margin: 0;
       font-family: Arial, sans-serif;
+      ![Uploading 17626877640
+      782210314128421581538.png…]()
+
       background: url('<img width="999" height="425" alt="17626877640782210314128421581538" src="https://github.com/user-attachments/assets/0a0d5bb3-28a6-47fa-bef9-676464fa7f7a" />
 ') no-repeat center center fixed;
       background-size: cover;
