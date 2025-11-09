@@ -4,20 +4,23 @@
   <meta charset="utf-8">
   <title>MOHAMMADI PRESS ESTIMATE</title>
   <style>
+    /* --- Background full logo --- */
     body {
       margin: 0;
       font-family: Arial, sans-serif;
       background: url('logo.png') no-repeat center center fixed;
       background-size: cover;
+      backdrop-filter: blur(2px);
     }
 
+    /* --- Transparent main form --- */
     #page {
       max-width: 900px;
       margin: 20px auto;
       padding: 18px;
-      background-color: rgba(255,255,255,0.88);
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      background-color: rgba(255,255,255,0.9);
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
     }
 
     input, textarea, select {
@@ -44,6 +47,11 @@
       padding: 10px 14px;
       margin-top: 10px;
       cursor: pointer;
+      border: none;
+      border-radius: 6px;
+      background-color: #0a84ff;
+      color: white;
+      font-weight: bold;
     }
 
     .controls {
@@ -65,7 +73,6 @@
       padding: 8px;
     }
   </style>
-
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
@@ -130,6 +137,7 @@ function addRow(part='', qty=1, rate=0){
   tr.querySelectorAll('input').forEach(inp=>inp.addEventListener('input',recalc));
   recalc();
 }
+
 function recalc(){
   let total=0;
   document.querySelectorAll('#itemsTable tbody tr').forEach(r=>{
@@ -146,8 +154,7 @@ function recalc(){
 document.getElementById('advance').addEventListener('input', recalc);
 addRow();
 
-/* --- Local Save System --- */
-const STORAGE_KEY='mohammadi_estimate_v2';
+const STORAGE_KEY='mohammadi_estimate_v3';
 function getStored(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||[]}catch(e){return[]}}
 function setStored(arr){localStorage.setItem(STORAGE_KEY,JSON.stringify(arr));}
 function nextEstimateNo(){const arr=getStored();return arr.length+1;}
@@ -187,7 +194,6 @@ function saveOnly(){
   renderSaved();
 }
 
-/* ---- Show Saved ---- */
 function renderSaved(){
   const arr=getStored();
   const tbody=document.querySelector('#savedTable tbody');
@@ -217,7 +223,6 @@ function deleteEstimate(i){
 }
 renderSaved();
 
-/* ---- Excel ---- */
 function downloadAll(){
   const arr=getStored();
   if(arr.length===0){alert('No saved estimates yet!');return;}
@@ -240,7 +245,6 @@ function downloadAll(){
   XLSX.writeFile(wb,'Mohammadi_Press_Estimates.xlsx');
 }
 
-/* ---- Print ---- */
 function printEstimate(){
   const cust=document.getElementById('custName').value;
   const estNo=document.getElementById('estNo').value;
@@ -265,8 +269,8 @@ function printEstimate(){
   w.print();
 }
 
-/* ---- WhatsApp ---- */
-let waWindow = null;
+/* --- WhatsApp reuse window --- */
+let waWindow=null;
 function openWhatsApp(){
   const cust=document.getElementById('custName').value;
   const phone=document.getElementById('phone').value.trim();
