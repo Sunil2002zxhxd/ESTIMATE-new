@@ -1,167 +1,160 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html>
 <head>
-<meta charset="UTF-8">
-<title>Estimate Generator - Mohammad Printing Press</title>
-<style>
-  body { font-family: Arial; margin: 20px; }
-  table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-  th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
-  input { width: 100%; padding: 5px; }
-  button { padding: 8px 12px; margin: 5px; cursor: pointer; border-radius: 6px; border: none; background: #007bff; color: white; }
-  button:hover { background: #0056b3; }
-</style>
+  <meta charset="utf-8">
+  <title>MOHAMMADI PRESS ESTIMATE</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width:900px; margin:18px auto; padding:12px; }
+    input, textarea, select { width:100%; padding:8px; margin:6px 0; box-sizing:border-box; }
+    .row { display:flex; gap:8px; }
+    .row > input { flex:1 }
+    table { width:100%; border-collapse:collapse; margin-top:8px; }
+    th,td { border:1px solid #ddd; padding:6px; text-align:left; }
+    button { padding:10px 14px; margin-top:10px; cursor:pointer; }
+    .controls { display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
+  <h2>MOHAMMADI PRINTING PRESS - KHAMBHAT</h2>
 
-<h2>🧾 MOHAMMADI PRINTING PRESS - KHAMBHAT</h2>
+  <label>Customer Name</label>
+  <input id="custName" placeholder="Customer name">
 
-<label>Customer Name:</label>
-<input type="text" id="custName" placeholder="Enter customer name"><br><br>
+  <label>Phone (with country code, e.g. 919825547625)</label>
+  <input id="phone" placeholder="91xxxxxxxxxx">
 
-<label>WhatsApp Number (with country code):</label>
-<input type="text" id="phone" placeholder="91xxxxxxxxxx"><br><br>
+  <label>Delivery / Process Days</label>
+  <input id="delivery" placeholder="2/3">
 
-<table id="itemsTable">
-  <thead>
-    <tr>
-      <th>Particulars</th>
-      <th>Qty</th>
-      <th>Rate</th>
-      <th>Amount</th>
-      <th>Remove</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><input type="text" class="part" placeholder="Item name"></td>
-      <td><input type="number" class="qty" value="1" onchange="calcTotal()"></td>
-      <td><input type="number" class="rate" value="0" onchange="calcTotal()"></td>
-      <td class="amt">0</td>
-      <td><button style="background:red" onclick="removeRow(this)">❌</button></td>
-    </tr>
-  </tbody>
-</table>
+  <h3>Items</h3>
+  <table id="itemsTable">
+    <thead><tr><th>Particulars</th><th>Qty</th><th>Rate</th><th>Amount</th><th></th></tr></thead>
+    <tbody></tbody>
+  </table>
+  <button onclick="addRow()">Add item</button>
 
-<button onclick="addRow()">➕ Add Item</button>
+  <div style="margin-top:12px;">
+    <label>Advance Paid (₹)</label>
+    <input id="advance" value="0">
+    <div style="margin-top:8px;">
+      <strong>Total: ₹<span id="total">0</span></strong><br>
+      <strong>Outstanding: ₹<span id="out">0</span></strong>
+    </div>
+  </div>
 
-<h3>Total: ₹<span id="total">0</span></h3>
-
-<label>Advance:</label>
-<input type="number" id="advance" value="0" onchange="calcTotal()"><br><br>
-
-<label>Delivery Days:</label>
-<input type="text" id="delivery" value="1"><br><br>
-
-<h3>Outstanding: ₹<span id="out">0</span></h3>
-
-<hr>
-
-<button onclick="openWhatsApp()">📩 Send to WhatsApp</button>
-<button onclick="printEstimate()">🖨️ Print</button>
-<button onclick="savePDF()">📄 Save PDF</button>
-<button onclick="saveExcel()">💾 Save to Excel</button>
-
-<hr>
-<footer>🏭 મોહંમદી પ્રિન્ટીંગ પ્રેસ | 📍 ખંભાત - 388620 | 📞 98255 47625</footer>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <div class="controls">
+    <button onclick="saveOnly()">💾 Save Only</button>
+    <button onclick="downloadAll()">⬇️ All Download (Excel)</button>
+    <button onclick="openWhatsApp()">💬 Send to WhatsApp</button>
+  </div>
 
 <script>
-function addRow(){
+function addRow(part='', qty=1, rate=0){
   const tbody = document.querySelector('#itemsTable tbody');
   const tr = document.createElement('tr');
   tr.innerHTML = `
-    <td><input type="text" class="part" placeholder="Item name"></td>
-    <td><input type="number" class="qty" value="1" onchange="calcTotal()"></td>
-    <td><input type="number" class="rate" value="0" onchange="calcTotal()"></td>
+    <td><input class="part" value="${part}"></td>
+    <td><input class="qty" type="number" value="${qty}" min="0"></td>
+    <td><input class="rate" type="number" value="${rate}" min="0"></td>
     <td class="amt">0</td>
-    <td><button style='background:red' onclick='removeRow(this)'>❌</button></td>
+    <td><button onclick="this.closest('tr').remove(); recalc()">Delete</button></td>
   `;
   tbody.appendChild(tr);
+  tr.querySelectorAll('input').forEach(inp => inp.addEventListener('input', recalc));
+  recalc();
 }
-
-function removeRow(btn){
-  btn.closest('tr').remove();
-  calcTotal();
-}
-
-function calcTotal(){
-  let total = 0;
-  document.querySelectorAll('#itemsTable tbody tr').forEach(row=>{
-    const qty = parseFloat(row.querySelector('.qty').value) || 0;
-    const rate = parseFloat(row.querySelector('.rate').value) || 0;
-    const amt = qty * rate;
-    row.querySelector('.amt').textContent = amt.toFixed(2);
-    total += amt;
+function recalc(){
+  let total=0;
+  document.querySelectorAll('#itemsTable tbody tr').forEach(r=>{
+    const q=parseFloat(r.querySelector('.qty').value)||0;
+    const rate=parseFloat(r.querySelector('.rate').value)||0;
+    const amt=q*rate;
+    r.querySelector('.amt').innerText=amt.toFixed(2);
+    total+=amt;
   });
-  document.getElementById('total').textContent = total.toFixed(2);
+  document.getElementById('total').innerText=total.toFixed(2);
+  const adv=parseFloat(document.getElementById('advance').value)||0;
+  document.getElementById('out').innerText=(total-adv).toFixed(2);
+}
+document.getElementById('advance').addEventListener('input', recalc);
+addRow();
 
-  const adv = parseFloat(document.getElementById('advance').value) || 0;
-  document.getElementById('out').textContent = (total - adv).toFixed(2);
+/* ---- Excel local save system ---- */
+const STORAGE_KEY='mohammadi_estimate_v1';
+function getStored(){ try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||[]}catch(e){return [];} }
+function setStored(arr){ localStorage.setItem(STORAGE_KEY,JSON.stringify(arr)); }
+function buildCurrent(){
+  const items=[];
+  document.querySelectorAll('#itemsTable tbody tr').forEach(r=>{
+    items.push({
+      part:r.querySelector('.part').value,
+      qty:r.querySelector('.qty').value,
+      rate:r.querySelector('.rate').value,
+      amt:r.querySelector('.amt').innerText
+    });
+  });
+  return {
+    customer:document.getElementById('custName').value,
+    phone:document.getElementById('phone').value,
+    delivery:document.getElementById('delivery').value,
+    total:document.getElementById('total').innerText,
+    advance:document.getElementById('advance').value,
+    outstanding:document.getElementById('out').innerText,
+    timestamp:new Date().toLocaleString(),
+    items
+  };
+}
+function saveOnly(){
+  const arr=getStored();
+  arr.push(buildCurrent());
+  setStored(arr);
+  alert('✅ Estimate saved successfully!');
+}
+function downloadAll(){
+  const arr=getStored();
+  if(arr.length===0){alert('No saved estimates yet!');return;}
+  const aoa=[];
+  aoa.push(['MOHAMMADI PRINTING PRESS - KHAMBHAT']);
+  aoa.push([]);
+  arr.forEach((est,i)=>{
+    aoa.push([`Estimate #${i+1}`, '', '', '', `Saved: ${est.timestamp}`]);
+    aoa.push(['Customer', est.customer, '', '', 'Phone: '+est.phone]);
+    aoa.push(['Delivery', est.delivery]);
+    aoa.push(['Total', est.total, '', '', 'Advance: '+est.advance]);
+    aoa.push(['Outstanding', est.outstanding]);
+    aoa.push(['Particulars','Qty','Rate','Amount']);
+    est.items.forEach(it=>aoa.push([it.part,it.qty,it.rate,it.amt]));
+    aoa.push([]);
+  });
+  const wb=XLSX.utils.book_new();
+  const ws=XLSX.utils.aoa_to_sheet(aoa);
+  XLSX.utils.book_append_sheet(wb,ws,'All Estimates');
+  XLSX.writeFile(wb,'mohammadi press estimate.xlsx');
+  alert('✅ All saved estimates downloaded!');
 }
 
+/* ---- WhatsApp message ---- */
 function openWhatsApp(){
-  const custName = document.getElementById('custName').value || '';
-  const phone = document.getElementById('phone').value.trim();
-  if(!phone){ alert('Enter phone number with country code'); return; }
-
-  let msg = "🧾 *MOHAMMADI PRINTING PRESS - KHAMBHAT*\n\n";
-  msg += "*ESTIMATE*\n";
-  msg += "👤 Customer: *" + custName + "*\n\n";
-  msg += "📦 *Particulars:*\n";
-
-  const rows = document.querySelectorAll('#itemsTable tbody tr');
-  rows.forEach((r, i) => {
-    const part = r.querySelector('.part').value || '';
-    const q = r.querySelector('.qty').value || '0';
-    const rate = r.querySelector('.rate').value || '0';
-    const amt = r.querySelector('.amt').textContent;
-    msg += `${i+1}. ${part}\n   Qty: ${q}\n   Rate: ₹${rate}\n   Amt: ₹${amt}\n\n`;
+  const cust=document.getElementById('custName').value;
+  const phone=document.getElementById('phone').value.trim();
+  if(!phone){alert('Enter phone number!');return;}
+  let msg=`*MOHAMMADI PRINTING PRESS - KHAMBHAT*\n\n*ESTIMATE*\n`;
+  msg+=`*Customer:* ${cust}\n\n`;
+  msg+=`*Particulars:*\n`;
+  document.querySelectorAll('#itemsTable tbody tr').forEach(r=>{
+    const part=r.querySelector('.part').value;
+    const q=r.querySelector('.qty').value;
+    const rate=r.querySelector('.rate').value;
+    const amt=r.querySelector('.amt').innerText;
+    msg+=`• ${part}\n   Qty: ${q}\n   Rate: ₹${rate}\n   Amt: ₹${amt}\n\n`;
   });
-
-  const total = document.getElementById('total').innerText;
-  const advance = document.getElementById('advance').value;
-  const out = document.getElementById('out').innerText;
-  const delivery = document.getElementById('delivery').value;
-
-  msg += `💰 *Total:* ₹${total}\n`;
-  msg += `💵 *Advance:* ₹${advance}\n`;
-  msg += `📉 *Outstanding:* ₹${out}\n`;
-  msg += `🚚 *Delivery:* ${delivery} Days\n\n`;
-  msg += "🏭 મોહંમદી પ્રિન્ટીંગ પ્રેસ\n📍 ખંભાત - 388620\n📞 98255 47625";
-
-  const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
-  window.open(url, '_blank');
-}
-
-function printEstimate(){
-  window.print();
-}
-
-function savePDF(){
-  const element = document.body;
-  html2pdf().from(element).save("Estimate.pdf");
-}
-
-function saveExcel(){
-  const rows = [["Particulars", "Qty", "Rate", "Amount"]];
-  document.querySelectorAll('#itemsTable tbody tr').forEach(row=>{
-    const part = row.querySelector('.part').value;
-    const qty = row.querySelector('.qty').value;
-    const rate = row.querySelector('.rate').value;
-    const amt = row.querySelector('.amt').textContent;
-    rows.push([part, qty, rate, amt]);
-  });
-  rows.push(["Total", "", "", document.getElementById('total').innerText]);
-  rows.push(["Advance", "", "", document.getElementById('advance').value]);
-  rows.push(["Outstanding", "", "", document.getElementById('out').innerText]);
-
-  const ws = XLSX.utils.aoa_to_sheet(rows);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Estimate");
-  XLSX.writeFile(wb, "Estimate.xlsx");
+  const total=document.getElementById('total').innerText;
+  const adv=document.getElementById('advance').value;
+  const out=document.getElementById('out').innerText;
+  const delivery=document.getElementById('delivery').value;
+  msg+=`*Total:* ₹${total}\n*Advance:* ₹${adv}\n*Outstanding:* ₹${out}\n*Delivery:* ${delivery}\n\n*મોહંમદી પ્રિન્ટીંગ પ્રેસ*\nમો.9825547625`;
+  window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`,'_blank');
 }
 </script>
 </body>
