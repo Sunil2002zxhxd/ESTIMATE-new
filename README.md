@@ -9,9 +9,10 @@
     max-width: 900px;
     margin: 18px auto;
     padding: 12px;
-    background: url('logo.png') no-repeat center center fixed;
-    background-size: 300px;
-    opacity: 0.95;
+    background: url('logo.jpg') no-repeat center center fixed;
+    background-size: 400px;
+    background-color: white;
+    opacity: 0.97;
   }
   header {
     display: flex;
@@ -34,8 +35,8 @@
 </head>
 <body>
   <header>
-    <img src="logo.png" alt="Logo">
     <h2>MOHAMMADI PRINTING PRESS - KHAMBHAT</h2>
+    <img src="logo.jpg" alt="Logo">
   </header>
 
   <label>Estimate Number</label>
@@ -75,7 +76,7 @@
   </table>
 
 <script>
-const STORAGE_KEY = 'mohammadi_estimates_v2';
+const STORAGE_KEY = 'mohammadi_estimates_v3';
 let whatsappTab = null;
 
 function getStored(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||[]}catch(e){return[]}}
@@ -143,8 +144,7 @@ function refreshTable(){
       <td>${e.estNo}</td>
       <td>${e.customer}</td>
       <td>₹${e.total}</td>
-      <td><input class="status" value="${e.status||''}" 
-        oninput="updateStatus(${i},this.value)"></td>
+      <td><input class="status" value="${e.status||''}" oninput="updateStatus(${i},this.value)"></td>
       <td><button onclick="delEstimate(${i})">🗑️</button></td>`;
     tb.appendChild(tr);
   });
@@ -203,7 +203,7 @@ function printEstimate(){
   w.document.write(`<html><head><title>Estimate #${n}</title></head><body>`);
   w.document.write(`<div style="display:flex;justify-content:space-between;align-items:center;">
   <h2>MOHAMMADI PRINTING PRESS - KHAMBHAT</h2>
-  <img src='logo.png' style='width:120px;'>
+  <img src='logo.jpg' style='width:100px;'>
   </div>`);
   w.document.write(`<p><b>Estimate No:</b> ${n}</p><p><b>Customer:</b> ${c}</p>`);
   w.document.write(document.getElementById('itemsTable').outerHTML);
