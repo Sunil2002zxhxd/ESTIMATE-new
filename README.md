@@ -59,13 +59,14 @@
   <div class="controls">
     <button onclick="generatePdf()">Generate & Download PDF (with images)</button>
     <button onclick="downloadImagesZip()">Download Images (ZIP)</button>
+    <button onclick="saveOnly()">💾 Save (only)</button>
     <button onclick="saveAndExportExcel()">💾 Save & Export Excel</button>
     <button onclick="downloadAllEstimates()">⬇️ Download All Estimates (Excel)</button>
     <button onclick="printEstimate()">🖨️ Print Estimate</button>
     <button onclick="openWhatsApp()">Open WhatsApp (prefilled message)</button>
   </div>
 
-  <p><small>નોટ: Export Excel કરવાથી તે Excel ફાઇલમાં તમારું હાલનું estimate જોડાઇ જાય છે (local storage માં saved). તમે પછી પણ Download All Estimates દબાવીને cumulative ફાઇલ પામого.</small></p>
+  <p><small>નોટ: Save (only) પર estimate localStorage માં જ સંગ્રહિત રહેશે. Save & Export Excel કરીને તમે સંગ્રહ પણ કરશો અને એકસાથે cumulative Excel પણ ડાઉનલોડ થશે. Download All Estimates ફક્ત સંગ્રહિત બધાં estimate ડાઉનલોડ કરશે.</small></p>
 
 <script>
 /* --------- Basic items & calc ---------- */
@@ -255,6 +256,12 @@ function buildAOAFromStored(arr){
   return aoa;
 }
 
+/* Save current estimate to storage (only) */
+function saveOnly(){
+  appendCurrentEstimateToStorage();
+  alert('Estimate saved locally (no download). Use "Download All Estimates" to get cumulative Excel when needed.');
+}
+
 /* Save current estimate to storage and export cumulative workbook */
 function saveAndExportExcel(){
   const arr = appendCurrentEstimateToStorage();
@@ -269,7 +276,7 @@ function saveAndExportExcel(){
 /* Download cumulative workbook without adding new */
 function downloadAllEstimates(){
   const arr = getStoredEstimates();
-  if(arr.length === 0){ alert('No estimates saved yet. Use "Save & Export Excel" to save current estimate.'); return; }
+  if(arr.length === 0){ alert('No estimates saved yet. Use "Save (only)" or "Save & Export Excel" to save current estimate.'); return; }
   const aoa = buildAOAFromStored(arr);
   const wb = XLSX.utils.book_new();
   const ws = XLSX.utils.aoa_to_sheet(aoa);
@@ -277,7 +284,7 @@ function downloadAllEstimates(){
   XLSX.writeFile(wb, 'estimates_all.xlsx');
 }
 
-/* --------- Print & WhatsApp (unchanged) --------- */
+/* --------- Print & WhatsApp (updated) --------- */
 function printEstimate(){
   const custName = document.getElementById('custName').value;
   const total = document.getElementById('total').innerText;
@@ -297,33 +304,7 @@ function printEstimate(){
   printWindow.print();
 }
 
+/* WhatsApp: formatted line-by-line, bold headings, each item in separate block */
 function openWhatsApp(){
   const custName = document.getElementById('custName').value || '';
-  const phone = document.getElementById('phone').value.trim();
-  if(!phone){ alert('Enter phone with country code'); return; }
-
-  let msg = "MOHAMMADIPRINTING PRESS - KHAMBHAT\n\nESTIMATE\n";
-  msg += "Customer: " + custName + "\n\nParticulars:\n";
-  const rows = document.querySelectorAll('#itemsTable tbody tr');
-  rows.forEach(r=>{
-    const part = r.querySelector('.part').value;
-    const q = r.querySelector('.qty').value;
-    const rate = r.querySelector('.rate').value;
-    const amt = (parseFloat(q||0)*parseFloat(rate||0)).toFixed(2);
-    msg += `${part}  Qty:${q}  Rate:₹${rate}  Amt:₹${amt}\n`;
-  });
-  const total = document.getElementById('total').innerText;
-  const advance = document.getElementById('advance').value;
-  const out = document.getElementById('out').innerText;
-  const delivery = document.getElementById('delivery').value;
-  msg += `\nTotal: ₹${total}\nAdvance: ₹${advance}\nOutstanding: ₹${out}\nDelivery: ${delivery}\n\nમોહંમદી પ્રિન્ટીંગ પ્રેસ\nમો.9825547625`;
-
-  const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
-  window.open(url, '_blank');
-}
-
-/* small helper */
-function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-</script>
-</body>
-</html>
+  const phone = do
