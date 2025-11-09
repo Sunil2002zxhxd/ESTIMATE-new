@@ -6,8 +6,6 @@
   <style>
     body { font-family: Arial, sans-serif; max-width:900px; margin:18px auto; padding:12px; }
     input, textarea, select { width:100%; padding:8px; margin:6px 0; box-sizing:border-box; }
-    .row { display:flex; gap:8px; }
-    .row > input { flex:1 }
     table { width:100%; border-collapse:collapse; margin-top:8px; }
     th,td { border:1px solid #ddd; padding:6px; text-align:left; }
     button { padding:10px 14px; margin-top:10px; cursor:pointer; }
@@ -17,6 +15,9 @@
 </head>
 <body>
   <h2>MOHAMMADI PRINTING PRESS - KHAMBHAT</h2>
+
+  <label>Estimate Number</label>
+  <input id="estNo" placeholder="Auto generated" readonly>
 
   <label>Customer Name</label>
   <input id="custName" placeholder="Customer name">
@@ -46,14 +47,15 @@
   <div class="controls">
     <button onclick="saveOnly()">💾 Save Only</button>
     <button onclick="downloadAll()">⬇️ All Download (Excel)</button>
+    <button onclick="printEstimate()">🖨️ Print Estimate</button>
     <button onclick="openWhatsApp()">💬 Send to WhatsApp</button>
   </div>
 
 <script>
 function addRow(part='', qty=1, rate=0){
-  const tbody = document.querySelector('#itemsTable tbody');
-  const tr = document.createElement('tr');
-  tr.innerHTML = `
+  const tbody=document.querySelector('#itemsTable tbody');
+  const tr=document.createElement('tr');
+  tr.innerHTML=`
     <td><input class="part" value="${part}"></td>
     <td><input class="qty" type="number" value="${qty}" min="0"></td>
     <td><input class="rate" type="number" value="${rate}" min="0"></td>
@@ -61,7 +63,7 @@ function addRow(part='', qty=1, rate=0){
     <td><button onclick="this.closest('tr').remove(); recalc()">Delete</button></td>
   `;
   tbody.appendChild(tr);
-  tr.querySelectorAll('input').forEach(inp => inp.addEventListener('input', recalc));
+  tr.querySelectorAll('input').forEach(inp=>inp.addEventListener('input',recalc));
   recalc();
 }
 function recalc(){
@@ -80,10 +82,13 @@ function recalc(){
 document.getElementById('advance').addEventListener('input', recalc);
 addRow();
 
-/* ---- Excel local save system ---- */
+/* ---- Local Excel Storage ---- */
 const STORAGE_KEY='mohammadi_estimate_v1';
-function getStored(){ try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||[]}catch(e){return [];} }
-function setStored(arr){ localStorage.setItem(STORAGE_KEY,JSON.stringify(arr)); }
+function getStored(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||[]}catch(e){return[]}}
+function setStored(arr){localStorage.setItem(STORAGE_KEY,JSON.stringify(arr));}
+function nextEstimateNo(){const arr=getStored();return arr.length+1;}
+document.getElementById('estNo').value=nextEstimateNo();
+
 function buildCurrent(){
   const items=[];
   document.querySelectorAll('#itemsTable tbody tr').forEach(r=>{
@@ -94,7 +99,8 @@ function buildCurrent(){
       amt:r.querySelector('.amt').innerText
     });
   });
-  return {
+  return{
+    estNo:document.getElementById('estNo').value,
     customer:document.getElementById('custName').value,
     phone:document.getElementById('phone').value,
     delivery:document.getElementById('delivery').value,
@@ -105,20 +111,24 @@ function buildCurrent(){
     items
   };
 }
+
 function saveOnly(){
   const arr=getStored();
-  arr.push(buildCurrent());
+  const current=buildCurrent();
+  arr.push(current);
   setStored(arr);
-  alert('✅ Estimate saved successfully!');
+  alert(`✅ Estimate #${current.estNo} saved successfully!`);
+  document.getElementById('estNo').value=nextEstimateNo();
 }
+
 function downloadAll(){
   const arr=getStored();
   if(arr.length===0){alert('No saved estimates yet!');return;}
   const aoa=[];
   aoa.push(['MOHAMMADI PRINTING PRESS - KHAMBHAT']);
   aoa.push([]);
-  arr.forEach((est,i)=>{
-    aoa.push([`Estimate #${i+1}`, '', '', '', `Saved: ${est.timestamp}`]);
+  arr.forEach(est=>{
+    aoa.push([`Estimate #${est.estNo}`, '', '', '', `Saved: ${est.timestamp}`]);
     aoa.push(['Customer', est.customer, '', '', 'Phone: '+est.phone]);
     aoa.push(['Delivery', est.delivery]);
     aoa.push(['Total', est.total, '', '', 'Advance: '+est.advance]);
@@ -134,14 +144,39 @@ function downloadAll(){
   alert('✅ All saved estimates downloaded!');
 }
 
-/* ---- WhatsApp message ---- */
+/* ---- Print Estimate ---- */
+function printEstimate(){
+  const cust=document.getElementById('custName').value;
+  const estNo=document.getElementById('estNo').value;
+  const total=document.getElementById('total').innerText;
+  const adv=document.getElementById('advance').value;
+  const out=document.getElementById('out').innerText;
+  const delivery=document.getElementById('delivery').value;
+
+  let w=window.open('', '', 'width=800,height=900');
+  w.document.write(`<html><head><title>Estimate #${estNo}</title></head><body>`);
+  w.document.write(`<h2>MOHAMMADI PRINTING PRESS - KHAMBHAT</h2>`);
+  w.document.write(`<p><b>Estimate No:</b> ${estNo}</p>`);
+  w.document.write(`<p><b>Customer:</b> ${cust}</p>`);
+  w.document.write(document.getElementById('itemsTable').outerHTML);
+  w.document.write(`<p><b>Total:</b> ₹${total}</p>`);
+  w.document.write(`<p><b>Advance:</b> ₹${adv}</p>`);
+  w.document.write(`<p><b>Outstanding:</b> ₹${out}</p>`);
+  w.document.write(`<p><b>Delivery:</b> ${delivery}</p>`);
+  w.document.write(`<hr><p>મોહંમદી પ્રિન્ટીંગ પ્રેસ<br>ખંભાત - 388620<br>મો.9825547625</p>`);
+  w.document.write('</body></html>');
+  w.document.close();
+  w.print();
+}
+
+/* ---- WhatsApp ---- */
 function openWhatsApp(){
   const cust=document.getElementById('custName').value;
   const phone=document.getElementById('phone').value.trim();
+  const estNo=document.getElementById('estNo').value;
   if(!phone){alert('Enter phone number!');return;}
-  let msg=`*MOHAMMADI PRINTING PRESS - KHAMBHAT*\n\n*ESTIMATE*\n`;
-  msg+=`*Customer:* ${cust}\n\n`;
-  msg+=`*Particulars:*\n`;
+  let msg=`*MOHAMMADI PRINTING PRESS - KHAMBHAT*\n\n*ESTIMATE #${estNo}*\n`;
+  msg+=`*Customer:* ${cust}\n\n*Particulars:*\n`;
   document.querySelectorAll('#itemsTable tbody tr').forEach(r=>{
     const part=r.querySelector('.part').value;
     const q=r.querySelector('.qty').value;
