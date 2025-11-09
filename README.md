@@ -10,24 +10,24 @@
       margin: 18px auto;
       padding: 12px;
       background: url('logo.png') no-repeat center center fixed;
-      background-size: 400px;
-      opacity: 0.95;
+      background-size: 420px;
+      opacity: 0.97;
     }
     input, textarea, select { width:100%; padding:8px; margin:6px 0; box-sizing:border-box; }
-    table { width:100%; border-collapse:collapse; margin-top:8px; }
+    table { width:100%; border-collapse:collapse; margin-top:8px; background:#fff; }
     th,td { border:1px solid #ddd; padding:6px; text-align:left; }
     button { padding:10px 14px; margin-top:10px; cursor:pointer; }
     .controls { display:flex; gap:10px; flex-wrap:wrap; margin-top:12px; }
-    .saved-table { margin-top: 25px; border: 2px solid #999; padding: 10px; background: #fff8; border-radius: 8px; }
+    .saved-table { margin-top:25px; border:2px solid #999; padding:10px; background:#fff9; border-radius:8px; }
     .header { display:flex; align-items:center; justify-content:space-between; }
-    .header img { width:100px; height:auto; }
+    .header img { width:120px; height:auto; }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
   <div class="header">
-    <img src="logo.png" alt="Logo">
     <h2>MOHAMMADI PRINTING PRESS - KHAMBHAT</h2>
+    <img src="logo.png" alt="Logo">
   </div>
 
   <label>Estimate Number</label>
@@ -66,9 +66,9 @@
   </div>
 
   <div class="saved-table">
-    <h3>📋 Saved Estimates (Local)</h3>
+    <h3>📋 Saved Estimates</h3>
     <table id="savedTable">
-      <thead><tr><th>Estimate No</th><th>Customer</th><th>Total (₹)</th><th>Outstanding (₹)</th><th>Date</th></tr></thead>
+      <thead><tr><th>No</th><th>Customer</th><th>Total (₹)</th><th>Outstanding (₹)</th><th>Date</th><th>Action</th></tr></thead>
       <tbody></tbody>
     </table>
   </div>
@@ -147,13 +147,22 @@ function renderSaved(){
   const arr=getStored();
   const tbody=document.querySelector('#savedTable tbody');
   tbody.innerHTML='';
-  arr.forEach(e=>{
+  arr.forEach((e,i)=>{
     const tr=document.createElement('tr');
-    tr.innerHTML=`<td>${e.estNo}</td><td>${e.customer}</td><td>${e.total}</td><td>${e.outstanding}</td><td>${e.timestamp}</td>`;
+    tr.innerHTML=`<td>${e.estNo}</td><td>${e.customer}</td><td>${e.total}</td><td>${e.outstanding}</td><td>${e.timestamp}</td>
+    <td><button onclick="deleteEstimate(${i})">❌ Delete</button></td>`;
     tbody.appendChild(tr);
   });
 }
 renderSaved();
+
+function deleteEstimate(index){
+  if(!confirm('Delete this estimate?')) return;
+  const arr=getStored();
+  arr.splice(index,1);
+  setStored(arr);
+  renderSaved();
+}
 
 function downloadAll(){
   const arr=getStored();
@@ -187,7 +196,10 @@ function printEstimate(){
   const delivery=document.getElementById('delivery').value;
   let w=window.open('', '', 'width=800,height=900');
   w.document.write(`<html><head><title>Estimate #${estNo}</title></head><body>`);
-  w.document.write(`<div style='text-align:center;'><img src='logo.png' width='100'><h2>MOHAMMADI PRINTING PRESS - KHAMBHAT</h2></div>`);
+  w.document.write(`<div style='display:flex;justify-content:space-between;align-items:center;'>
+  <h2>MOHAMMADI PRINTING PRESS - KHAMBHAT</h2>
+  <img src='logo.png' width='120'>
+  </div>`);
   w.document.write(`<p><b>Estimate No:</b> ${estNo}</p>`);
   w.document.write(`<p><b>Customer:</b> ${cust}</p>`);
   w.document.write(document.getElementById('itemsTable').outerHTML);
