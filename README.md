@@ -1,312 +1,189 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>MOHAMMADI PRESS ESTIMATE</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Estimate Generator</title>
   <style>
-    /* --- Background full logo --- */
-    <div style="text-align:center; margin-top:10px;">
-  <img src="logo.jpg" alt="Logo" style="width:150px; height:auto; border-radius:10px;">
-</div>
-
     body {
-      margin: 0;
       font-family: Arial, sans-serif;
-      ![Uploading 17626877640
-      782210314128421581538.png…]()
-
-      background: url('<img width="999" height="425" alt="17626877640782210314128421581538" src="https://github.com/user-attachments/assets/0a0d5bb3-28a6-47fa-bef9-676464fa7f7a" />
-') no-repeat center center fixed;
-      background-size: cover;
-      backdrop-filter: blur(2px);
+      margin: 20px;
+      background-color: white;
     }
-
-    /* --- Transparent main form --- */
-    #page {
-      max-width: 900px;
-      margin: 20px auto;
-      padding: 18px;
-      background-color: rgba(255,255,255,0.9);
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    h1 {
+      color: #0078D7;
+      text-align: center;
     }
-
-    input, textarea, select {
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    input {
       width: 100%;
       padding: 8px;
-      margin: 6px 0;
+      margin-top: 5px;
       box-sizing: border-box;
     }
-
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 8px;
-      background-color: white;
+      margin-top: 15px;
     }
-
     th, td {
-      border: 1px solid #ddd;
-      padding: 6px;
-      text-align: left;
-    }
-
-    button {
-      padding: 10px 14px;
-      margin-top: 10px;
-      cursor: pointer;
-      border: none;
-      border-radius: 6px;
-      background-color: #0a84ff;
-      color: white;
-      font-weight: bold;
-    }
-
-    .controls {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 12px;
-    }
-
-    #savedTable {
-      margin-top: 20px;
-      width: 100%;
-      border-collapse: collapse;
-      background: white;
-    }
-
-    #savedTable th, #savedTable td {
       border: 1px solid #ccc;
       padding: 8px;
+      text-align: left;
+    }
+    th {
+      background-color: #f0f0f0;
+    }
+    button {
+      margin-top: 15px;
+      padding: 10px 20px;
+      background-color: #0078D7;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #005fa3;
     }
   </style>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
-  <div id="page">
-    <h2>MOHAMMADI PRINTING PRESS - KHAMBHAT</h2>
 
-    <label>Estimate Number</label>
-    <input id="estNo" placeholder="Auto generated" readonly>
-
-    <label>Customer Name</label>
-    <input id="custName" placeholder="Customer name">
-
-    <label>Phone (with country code, e.g. 919825547625)</label>
-    <input id="phone" placeholder="91xxxxxxxxxx">
-
-    <label>Delivery / Process Days</label>
-    <input id="delivery" placeholder="2/3">
-
-    <h3>Items</h3>
-    <table id="itemsTable">
-      <thead><tr><th>Particulars</th><th>Qty</th><th>Rate</th><th>Amount</th><th></th></tr></thead>
-      <tbody></tbody>
-    </table>
-    <button onclick="addRow()">Add item</button>
-
-    <div style="margin-top:12px;">
-      <label>Advance Paid (₹)</label>
-      <input id="advance" value="0">
-      <div style="margin-top:8px;">
-        <strong>Total: ₹<span id="total">0</span></strong><br>
-        <strong>Outstanding: ₹<span id="out">0</span></strong>
-      </div>
-    </div>
-
-    <div class="controls">
-      <button onclick="saveOnly()">💾 Save Only</button>
-      <button onclick="downloadAll()">⬇️ All Download (Excel)</button>
-      <button onclick="printEstimate()">🖨️ Print Estimate</button>
-      <button onclick="openWhatsApp()">💬 Send to WhatsApp</button>
-    </div>
-
-    <h3>Saved Estimates</h3>
-    <table id="savedTable">
-      <thead>
-        <tr><th>No.</th><th>Customer</th><th>Total</th><th>Outstanding</th><th>Status</th><th>Action</th></tr>
-      </thead>
-      <tbody></tbody>
-    </table>
+  <!-- 🌈 LOGO SECTION -->
+  <div style="text-align:center; margin-bottom:15px;">
+    <img src="https://raw.githubusercontent.com/Sunil2002zxhxd/ESTIMATE-new/main/7376b61a-b491-497f-b65c-4e6ecb7e522a.png" 
+         alt="Logo" 
+         style="width:180px; height:auto;">
   </div>
 
-<script>
-function addRow(part='', qty=1, rate=0){
-  const tbody=document.querySelector('#itemsTable tbody');
-  const tr=document.createElement('tr');
-  tr.innerHTML=`
-    <td><input class="part" value="${part}"></td>
-    <td><input class="qty" type="number" value="${qty}" min="0"></td>
-    <td><input class="rate" type="number" value="${rate}" min="0"></td>
-    <td class="amt">0</td>
-    <td><button onclick="this.closest('tr').remove(); recalc()">Delete</button></td>`;
-  tbody.appendChild(tr);
-  tr.querySelectorAll('input').forEach(inp=>inp.addEventListener('input',recalc));
-  recalc();
-}
+  <h1>ESTIMATE-new</h1>
+  <hr>
 
-function recalc(){
-  let total=0;
-  document.querySelectorAll('#itemsTable tbody tr').forEach(r=>{
-    const q=parseFloat(r.querySelector('.qty').value)||0;
-    const rate=parseFloat(r.querySelector('.rate').value)||0;
-    const amt=q*rate;
-    r.querySelector('.amt').innerText=amt.toFixed(2);
-    total+=amt;
-  });
-  document.getElementById('total').innerText=total.toFixed(2);
-  const adv=parseFloat(document.getElementById('advance').value)||0;
-  document.getElementById('out').innerText=(total-adv).toFixed(2);
-}
-document.getElementById('advance').addEventListener('input', recalc);
-addRow();
+  <h2 style="text-align:center;">MOHAMMADI PRINTING PRESS - KHAMBHAT</h2>
 
-const STORAGE_KEY='mohammadi_estimate_v3';
-function getStored(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||[]}catch(e){return[]}}
-function setStored(arr){localStorage.setItem(STORAGE_KEY,JSON.stringify(arr));}
-function nextEstimateNo(){const arr=getStored();return arr.length+1;}
-document.getElementById('estNo').value=nextEstimateNo();
+  <label>Estimate Number</label>
+  <input type="number" id="estimateNumber" value="1">
 
-function buildCurrent(){
-  const items=[];
-  document.querySelectorAll('#itemsTable tbody tr').forEach(r=>{
-    items.push({
-      part:r.querySelector('.part').value,
-      qty:r.querySelector('.qty').value,
-      rate:r.querySelector('.rate').value,
-      amt:r.querySelector('.amt').innerText
-    });
-  });
-  return{
-    estNo:document.getElementById('estNo').value,
-    customer:document.getElementById('custName').value,
-    phone:document.getElementById('phone').value,
-    delivery:document.getElementById('delivery').value,
-    total:document.getElementById('total').innerText,
-    advance:document.getElementById('advance').value,
-    outstanding:document.getElementById('out').innerText,
-    status:'Pending',
-    timestamp:new Date().toLocaleString(),
-    items
-  };
-}
+  <label>Customer Name</label>
+  <input type="text" id="customerName" placeholder="Customer name">
 
-function saveOnly(){
-  const arr=getStored();
-  const current=buildCurrent();
-  arr.push(current);
-  setStored(arr);
-  alert(`✅ Estimate #${current.estNo} saved successfully!`);
-  document.getElementById('estNo').value=nextEstimateNo();
-  renderSaved();
-}
+  <label>Phone (with country code, e.g. 919825547625)</label>
+  <input type="number" id="customerPhone" placeholder="91xxxxxxxxxx">
 
-function renderSaved(){
-  const arr=getStored();
-  const tbody=document.querySelector('#savedTable tbody');
-  tbody.innerHTML='';
-  arr.forEach((est,i)=>{
-    const tr=document.createElement('tr');
-    tr.innerHTML=`
-      <td>${est.estNo}</td>
-      <td>${est.customer}</td>
-      <td>₹${est.total}</td>
-      <td>₹${est.outstanding}</td>
-      <td contenteditable="true" oninput="updateStatus(${i}, this.innerText)">${est.status||'Pending'}</td>
-      <td><button onclick="deleteEstimate(${i})">🗑 Delete</button></td>`;
-    tbody.appendChild(tr);
-  });
-}
-function updateStatus(i, val){
-  const arr=getStored();
-  arr[i].status=val;
-  setStored(arr);
-}
-function deleteEstimate(i){
-  const arr=getStored();
-  arr.splice(i,1);
-  setStored(arr);
-  renderSaved();
-}
-renderSaved();
+  <label>Delivery / Process Days</label>
+  <input type="text" id="processDays" placeholder="2/3">
 
-function downloadAll(){
-  const arr=getStored();
-  if(arr.length===0){alert('No saved estimates yet!');return;}
-  const aoa=[];
-  aoa.push(['MOHAMMADI PRINTING PRESS - KHAMBHAT']); aoa.push([]);
-  arr.forEach(est=>{
-    aoa.push([`Estimate #${est.estNo}`, '', '', '', `Saved: ${est.timestamp}`]);
-    aoa.push(['Customer', est.customer, '', '', 'Phone: '+est.phone]);
-    aoa.push(['Delivery', est.delivery]);
-    aoa.push(['Total', est.total, '', '', 'Advance: '+est.advance]);
-    aoa.push(['Outstanding', est.outstanding]);
-    aoa.push(['Status', est.status]);
-    aoa.push(['Particulars','Qty','Rate','Amount']);
-    est.items.forEach(it=>aoa.push([it.part,it.qty,it.rate,it.amt]));
-    aoa.push([]);
-  });
-  const wb=XLSX.utils.book_new();
-  const ws=XLSX.utils.aoa_to_sheet(aoa);
-  XLSX.utils.book_append_sheet(wb,ws,'All Estimates');
-  XLSX.writeFile(wb,'Mohammadi_Press_Estimates.xlsx');
-}
+  <h3>Items</h3>
+  <table id="itemsTable">
+    <tr>
+      <th>Particulars</th>
+      <th>Quantity</th>
+      <th>Rate (₹)</th>
+      <th>Total (₹)</th>
+    </tr>
+    <tr>
+      <td><input type="text" placeholder="Item name"></td>
+      <td><input type="number" value="1"></td>
+      <td><input type="number" value="0"></td>
+      <td><input type="number" value="0" readonly></td>
+    </tr>
+  </table>
 
-function printEstimate(){
-  const cust=document.getElementById('custName').value;
-  const estNo=document.getElementById('estNo').value;
-  const total=document.getElementById('total').innerText;
-  const adv=document.getElementById('advance').value;
-  const out=document.getElementById('out').innerText;
-  const delivery=document.getElementById('delivery').value;
-  let w=window.open('', '', 'width=800,height=900');
-  w.document.write(`<html><head><title>Estimate #${estNo}</title></head><body>`);
-  w.document.write(`<img src='logo.png' style='position:absolute;right:20px;top:20px;width:120px;'>`);
-  w.document.write(`<h2>MOHAMMADI PRINTING PRESS - KHAMBHAT</h2>`);
-  w.document.write(`<p><b>Estimate No:</b> ${estNo}</p>`);
-  w.document.write(`<p><b>Customer:</b> ${cust}</p>`);
-  w.document.write(document.getElementById('itemsTable').outerHTML);
-  w.document.write(`<p><b>Total:</b> ₹${total}</p>`);
-  w.document.write(`<p><b>Advance:</b> ₹${adv}</p>`);
-  w.document.write(`<p><b>Outstanding:</b> ₹${out}</p>`);
-  w.document.write(`<p><b>Delivery:</b> ${delivery}</p>`);
-  w.document.write(`<hr><p>મોહંમદી પ્રિન્ટીંગ પ્રેસ<br>ખંભાત - 388620<br>મો.9825547625</p>`);
-  w.document.write('</body></html>');
-  w.document.close();
-  w.print();
-}
+  <button onclick="addItem()">Add item</button>
 
-/* --- WhatsApp reuse window --- */
-let waWindow=null;
-function openWhatsApp(){
-  const cust=document.getElementById('custName').value;
-  const phone=document.getElementById('phone').value.trim();
-  const estNo=document.getElementById('estNo').value;
-  if(!phone){alert('Enter phone number!');return;}
-  let msg=`*MOHAMMADI PRINTING PRESS - KHAMBHAT*\n\n*ESTIMATE #${estNo}*\n`;
-  msg+=`*Customer:* ${cust}\n\n*Particulars:*\n`;
-  document.querySelectorAll('#itemsTable tbody tr').forEach(r=>{
-    const part=r.querySelector('.part').value;
-    const q=r.querySelector('.qty').value;
-    const rate=r.querySelector('.rate').value;
-    const amt=r.querySelector('.amt').innerText;
-    msg+=`• ${part}\n   Qty: ${q}\n   Rate: ₹${rate}\n   Amt: ₹${amt}\n\n`;
-  });
-  const total=document.getElementById('total').innerText;
-  const adv=document.getElementById('advance').value;
-  const out=document.getElementById('out').innerText;
-  const delivery=document.getElementById('delivery').value;
-  msg+=`*Total:* ₹${total}\n*Advance:* ₹${adv}\n*Outstanding:* ₹${out}\n*Delivery:* ${delivery}\n\n*મોહંમદી પ્રિન્ટીંગ પ્રેસ*\nમો.9825547625`;
+  <label>Advance Paid (₹)</label>
+  <input type="number" id="advancePaid" value="0">
 
-  const url=`https://web.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(msg)}`;
-  if(waWindow==null || waWindow.closed){
-    waWindow=window.open(url,'whatsapp');
-  } else {
-    waWindow.location.href=url;
-    waWindow.focus();
-  }
-}
-</script>
+  <h3 id="totalAmount">Total: ₹ 0</h3>
+
+  <button onclick="calculateTotal()">Calculate Total</button>
+  <button onclick="printEstimate()">Print Estimate</button>
+
+  <script>
+    function addItem() {
+      const table = document.getElementById("itemsTable");
+      const row = table.insertRow();
+      row.innerHTML = `
+        <td><input type="text" placeholder="Item name"></td>
+        <td><input type="number" value="1"></td>
+        <td><input type="number" value="0"></td>
+        <td><input type="number" value="0" readonly></td>
+      `;
+    }
+
+    function calculateTotal() {
+      const rows = document.querySelectorAll("#itemsTable tr:not(:first-child)");
+      let total = 0;
+      rows.forEach(row => {
+        const qty = row.cells[1].querySelector("input").valueAsNumber || 0;
+        const rate = row.cells[2].querySelector("input").valueAsNumber || 0;
+        const sum = qty * rate;
+        row.cells[3].querySelector("input").value = sum;
+        total += sum;
+      });
+      document.getElementById("totalAmount").innerText = "Total: ₹ " + total;
+    }
+
+    function printEstimate() {
+      calculateTotal();
+      const logoUrl = "https://raw.githubusercontent.com/Sunil2002zxhxd/ESTIMATE-new/main/7376b61a-b491-497f-b65c-4e6ecb7e522a.png";
+      const estNo = document.getElementById("estimateNumber").value;
+      const name = document.getElementById("customerName").value;
+      const phone = document.getElementById("customerPhone").value;
+      const days = document.getElementById("processDays").value;
+      const advance = document.getElementById("advancePaid").value;
+      const total = document.getElementById("totalAmount").innerText;
+
+      let itemsHTML = "<table border='1' cellspacing='0' cellpadding='5'><tr><th>Particulars</th><th>Qty</th><th>Rate</th><th>Total</th></tr>";
+      const rows = document.querySelectorAll("#itemsTable tr:not(:first-child)");
+      rows.forEach(row => {
+        const part = row.cells[0].querySelector("input").value;
+        const qty = row.cells[1].querySelector("input").value;
+        const rate = row.cells[2].querySelector("input").value;
+        const total = row.cells[3].querySelector("input").value;
+        itemsHTML += `<tr><td>${part}</td><td>${qty}</td><td>${rate}</td><td>${total}</td></tr>`;
+      });
+      itemsHTML += "</table>";
+
+      const printWindow = window.open('', '_blank');
+      printWindow.document.write(`
+        <html>
+        <head>
+          <title>Estimate Print</title>
+          <style>
+            body { font-family: Arial; margin: 20px; }
+            h1 { text-align:center; color:#0078D7; }
+            h2 { text-align:center; }
+            table { width:100%; border-collapse: collapse; margin-top:10px; }
+            th, td { border:1px solid #ccc; padding:8px; text-align:left; }
+            th { background:#f2f2f2; }
+          </style>
+        </head>
+        <body>
+          <div style="text-align:center;">
+            <img src="${logoUrl}" style="width:140px; margin-bottom:10px;">
+          </div>
+          <h1>MOHAMMADI PRINTING PRESS - KHAMBHAT</h1>
+          <p><b>Estimate No:</b> ${estNo}<br>
+             <b>Name:</b> ${name}<br>
+             <b>Phone:</b> ${phone}<br>
+             <b>Delivery/Process Days:</b> ${days}</p>
+          ${itemsHTML}
+          <h3>${total}</h3>
+          <p><b>Advance Paid:</b> ₹${advance}</p>
+          <h3>Thank you for your business!</h3>
+        </body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.print();
+    }
+  </script>
+
 </body>
 </html>
