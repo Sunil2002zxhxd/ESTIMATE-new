@@ -7,11 +7,25 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      margin: 20px;
+      margin: 0;
+      padding: 0;
+      background: url('https://raw.githubusercontent.com/Sunil2002zxhxd/ESTIMATE-new/main/7376b61a-b491-497f-b65c-4e6ecb7e522a.png') no-repeat center center fixed;
+      background-size: cover;
       background-color: white;
+    }
+    .container {
+      background: rgba(255,255,255,0.9);
+      margin: 20px;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
     }
     h1 {
       color: #0078D7;
+      text-align: center;
+      margin-top: 0;
+    }
+    h2 {
       text-align: center;
     }
     label {
@@ -39,7 +53,7 @@
       background-color: #f0f0f0;
     }
     button {
-      margin-top: 15px;
+      margin-top: 10px;
       padding: 10px 20px;
       background-color: #0078D7;
       color: white;
@@ -50,59 +64,62 @@
     button:hover {
       background-color: #005fa3;
     }
+    .footer-buttons {
+      text-align: center;
+      margin-top: 20px;
+    }
   </style>
 </head>
 <body>
 
-  <!-- 🌈 LOGO SECTION -->
-  <div style="text-align:center; margin-bottom:15px;">
-    <img src="https://raw.githubusercontent.com/Sunil2002zxhxd/ESTIMATE-new/main/7376b61a-b491-497f-b65c-4e6ecb7e522a.png" 
-         alt="Logo" 
-         style="width:180px; height:auto;">
+  <div class="container">
+    <h1>ESTIMATE-new</h1>
+    <h2>MOHAMMADI PRINTING PRESS - KHAMBHAT</h2>
+
+    <label>Estimate Number</label>
+    <input type="number" id="estimateNumber" value="1">
+
+    <label>Customer Name</label>
+    <input type="text" id="customerName" placeholder="Customer name">
+
+    <label>Phone (with country code, e.g. 919825547625)</label>
+    <input type="number" id="customerPhone" placeholder="91xxxxxxxxxx">
+
+    <label>Delivery / Process Days</label>
+    <input type="text" id="processDays" placeholder="2/3">
+
+    <h3>Items</h3>
+    <table id="itemsTable">
+      <tr>
+        <th>Particulars</th>
+        <th>Quantity</th>
+        <th>Rate (₹)</th>
+        <th>Total (₹)</th>
+        <th>Status</th>
+      </tr>
+      <tr>
+        <td><input type="text" placeholder="Item name"></td>
+        <td><input type="number" value="1"></td>
+        <td><input type="number" value="0"></td>
+        <td><input type="number" value="0" readonly></td>
+        <td><input type="text" placeholder="Pending / Done"></td>
+      </tr>
+    </table>
+
+    <button onclick="addItem()">Add item</button>
+
+    <label>Advance Paid (₹)</label>
+    <input type="number" id="advancePaid" value="0">
+
+    <h3 id="totalAmount">Total: ₹ 0</h3>
+
+    <div class="footer-buttons">
+      <button onclick="calculateTotal()">Calculate Total</button>
+      <button onclick="saveOnly()">💾 Save Only</button>
+      <button onclick="sendWhatsApp()">📤 Send Estimate</button>
+      <button onclick="saveExcel()">📊 Save Excel</button>
+    </div>
   </div>
-
-  <h1>ESTIMATE-new</h1>
-  <hr>
-
-  <h2 style="text-align:center;">MOHAMMADI PRINTING PRESS - KHAMBHAT</h2>
-
-  <label>Estimate Number</label>
-  <input type="number" id="estimateNumber" value="1">
-
-  <label>Customer Name</label>
-  <input type="text" id="customerName" placeholder="Customer name">
-
-  <label>Phone (with country code, e.g. 919825547625)</label>
-  <input type="number" id="customerPhone" placeholder="91xxxxxxxxxx">
-
-  <label>Delivery / Process Days</label>
-  <input type="text" id="processDays" placeholder="2/3">
-
-  <h3>Items</h3>
-  <table id="itemsTable">
-    <tr>
-      <th>Particulars</th>
-      <th>Quantity</th>
-      <th>Rate (₹)</th>
-      <th>Total (₹)</th>
-    </tr>
-    <tr>
-      <td><input type="text" placeholder="Item name"></td>
-      <td><input type="number" value="1"></td>
-      <td><input type="number" value="0"></td>
-      <td><input type="number" value="0" readonly></td>
-    </tr>
-  </table>
-
-  <button onclick="addItem()">Add item</button>
-
-  <label>Advance Paid (₹)</label>
-  <input type="number" id="advancePaid" value="0">
-
-  <h3 id="totalAmount">Total: ₹ 0</h3>
-
-  <button onclick="calculateTotal()">Calculate Total</button>
-  <button onclick="printEstimate()">Print Estimate</button>
 
   <script>
     function addItem() {
@@ -113,6 +130,7 @@
         <td><input type="number" value="1"></td>
         <td><input type="number" value="0"></td>
         <td><input type="number" value="0" readonly></td>
+        <td><input type="text" placeholder="Pending / Done"></td>
       `;
     }
 
@@ -129,59 +147,34 @@
       document.getElementById("totalAmount").innerText = "Total: ₹ " + total;
     }
 
-    function printEstimate() {
+    function saveOnly() {
+      alert("✅ Estimate saved locally! (You can copy or screenshot it)");
+    }
+
+    function sendWhatsApp() {
       calculateTotal();
-      const logoUrl = "https://raw.githubusercontent.com/Sunil2002zxhxd/ESTIMATE-new/main/7376b61a-b491-497f-b65c-4e6ecb7e522a.png";
-      const estNo = document.getElementById("estimateNumber").value;
       const name = document.getElementById("customerName").value;
-      const phone = document.getElementById("customerPhone").value;
-      const days = document.getElementById("processDays").value;
-      const advance = document.getElementById("advancePaid").value;
       const total = document.getElementById("totalAmount").innerText;
+      const phone = document.getElementById("customerPhone").value;
+      const message = `*Estimate - MOHAMMADI PRINTING PRESS*\nCustomer: ${name}\n${total}\nThank you!`;
+      const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+      window.open(url, "_blank");
+    }
 
-      let itemsHTML = "<table border='1' cellspacing='0' cellpadding='5'><tr><th>Particulars</th><th>Qty</th><th>Rate</th><th>Total</th></tr>";
-      const rows = document.querySelectorAll("#itemsTable tr:not(:first-child)");
+    function saveExcel() {
+      const rows = document.querySelectorAll("#itemsTable tr");
+      let csv = [];
       rows.forEach(row => {
-        const part = row.cells[0].querySelector("input").value;
-        const qty = row.cells[1].querySelector("input").value;
-        const rate = row.cells[2].querySelector("input").value;
-        const total = row.cells[3].querySelector("input").value;
-        itemsHTML += `<tr><td>${part}</td><td>${qty}</td><td>${rate}</td><td>${total}</td></tr>`;
+        const cols = row.querySelectorAll("input, th");
+        const rowData = Array.from(cols).map(col => col.value || col.innerText);
+        csv.push(rowData.join(","));
       });
-      itemsHTML += "</table>";
 
-      const printWindow = window.open('', '_blank');
-      printWindow.document.write(`
-        <html>
-        <head>
-          <title>Estimate Print</title>
-          <style>
-            body { font-family: Arial; margin: 20px; }
-            h1 { text-align:center; color:#0078D7; }
-            h2 { text-align:center; }
-            table { width:100%; border-collapse: collapse; margin-top:10px; }
-            th, td { border:1px solid #ccc; padding:8px; text-align:left; }
-            th { background:#f2f2f2; }
-          </style>
-        </head>
-        <body>
-          <div style="text-align:center;">
-            <img src="${logoUrl}" style="width:140px; margin-bottom:10px;">
-          </div>
-          <h1>MOHAMMADI PRINTING PRESS - KHAMBHAT</h1>
-          <p><b>Estimate No:</b> ${estNo}<br>
-             <b>Name:</b> ${name}<br>
-             <b>Phone:</b> ${phone}<br>
-             <b>Delivery/Process Days:</b> ${days}</p>
-          ${itemsHTML}
-          <h3>${total}</h3>
-          <p><b>Advance Paid:</b> ₹${advance}</p>
-          <h3>Thank you for your business!</h3>
-        </body>
-        </html>
-      `);
-      printWindow.document.close();
-      printWindow.print();
+      const blob = new Blob([csv.join("\n")], { type: "text/csv" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "Estimate.csv";
+      link.click();
     }
   </script>
 
