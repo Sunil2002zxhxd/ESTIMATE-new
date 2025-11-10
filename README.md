@@ -5,6 +5,10 @@
   <title>MOHAMMADI PRESS ESTIMATE</title>
   <style>
     /* --- Background full logo --- */
+    <div style="text-align:center; margin-top:10px;">
+  <img src="logo.jpg" alt="Logo" style="width:150px; height:auto; border-radius:10px;">
+</div>
+
     body {
       margin: 0;
       font-family: Arial, sans-serif;
