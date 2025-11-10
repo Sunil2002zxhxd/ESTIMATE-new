@@ -41,11 +41,11 @@
     }
   </style>
 
-  <!-- Firebase (compat) -->
+  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
-  <!-- XLSX for Excel download -->
+  <!-- XLSX for Excel -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
@@ -58,7 +58,7 @@
     <label>Customer Name (ગ્રાહકનું નામ)</label>
     <input id="custName" placeholder="Customer name / ગ્રાહકનું નામ">
 
-    <label>Phone (ફોન નંબર) — with country code</label>
+    <label>Phone (ફોન નંબર)</label>
     <input id="phone" placeholder="9198xxxx...">
 
     <label>Delivery / Process Days (ડિલિવરી / દિવસ)</label>
@@ -71,27 +71,24 @@
       </thead>
       <tbody></tbody>
     </table>
-    <div style="margin-top:8px;">
-      <button onclick="addRow()" class="small">+ Add item (વસ્તુ ઉમેરો)</button>
-    </div>
+    <div><button onclick="addRow()" class="small">+ Add item (વસ્તુ ઉમેરો)</button></div>
 
-    <div style="margin-top:12px;">
-      <label>Advance Paid (એડવાન્સ)</label>
-      <input id="advance" value="0" type="number">
-      <div style="margin-top:8px;">
-        <strong>Total (કુલ): ₹<span id="total">0.00</span></strong><br>
-        <strong>Outstanding (બાકી): ₹<span id="out">0.00</span></strong>
-      </div>
+    <label>Advance Paid (એડવાન્સ)</label>
+    <input id="advance" value="0" type="number">
+
+    <div>
+      <strong>Total (કુલ): ₹<span id="total">0.00</span></strong><br>
+      <strong>Outstanding (બાકી): ₹<span id="out">0.00</span></strong>
     </div>
 
     <div class="controls">
       <button onclick="saveOnline()">💾 Save (Online)</button>
-      <button onclick="downloadAll()" class="secondary">⬇️ Download All (Excel)</button>
+      <button onclick="downloadAll()" class="secondary">⬇️ Excel</button>
       <button onclick="printEstimate()" class="warn">🖨️ Print</button>
       <button onclick="openWhatsApp()">💬 WhatsApp</button>
     </div>
 
-    <p class="note">Particulars have suggestions — type and select (Bill Book, Visiting Card, Flex Banner, etc.)</p>
+    <p class="note">Type item name or select suggestion (Bill Book, Visiting Card, etc.)</p>
 
     <h3>Saved Estimates (સાચવેલા અંદાજ)</h3>
     <table id="savedTable">
@@ -101,259 +98,150 @@
   </div>
 
 <script>
-  /********** Firebase config (from your project) **********/
-  const firebaseConfig = {
-    apiKey: "AIzaSyB7mjbXykKBaOoHYrUkZcLfMTX_2n3HVE8",
-    authDomain: "mohammadi-press-estimate.firebaseapp.com",
-    projectId: "mohammadi-press-estimate",
-    storageBucket: "mohammadi-press-estimate.firebasestorage.app",
-    messagingSenderId: "1071377650825",
-    appId: "1:1071377650825:web:48677a9fedba43b30b6258"
-    // If you have databaseURL, you can add: databaseURL: "https://<your-db>.firebaseio.com"
+/* ---------------- Firebase Config ---------------- */
+const firebaseConfig = {
+  apiKey: "AIzaSyB7mjbXykKBaOoHYrUkZcLfMTX_2n3HVE8",
+  authDomain: "mohammadi-press-estimate.firebaseapp.com",
+  projectId: "mohammadi-press-estimate",
+  storageBucket: "mohammadi-press-estimate.firebasestorage.app",
+  messagingSenderId: "1071377650825",
+  appId: "1:1071377650825:web:48677a9fedba43b30b6258",
+  databaseURL: "https://mohammadi-press-estimate-default-rtdb.firebaseio.com"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+/* ---------------- Suggestions ---------------- */
+const itemsList = ["Bill Book","Visiting Card","Flex Banner","Sticker","Invitation Card","Letterhead","Receipt Book","ID Card","Vinyl Printing","Pamphlet","Poster","Envelope","Glow Sign Board","Business Card (English)","Business Card (Gujarati)","Sticker (Vinyl)"];
+const dl=document.createElement('datalist');dl.id='itemSuggestions';itemsList.forEach(i=>{const o=document.createElement('option');o.value=i;dl.appendChild(o)});document.body.appendChild(dl);
+
+/* ---------------- Table functions ---------------- */
+function addRow(part='',qty=1,rate=0){
+  const tr=document.createElement('tr');
+  tr.innerHTML=`<td><input class="part" list="itemSuggestions" value="${part}"></td>
+  <td><input class="qty" type="number" value="${qty}"></td>
+  <td><input class="rate" type="number" value="${rate}"></td>
+  <td class="amt">0.00</td>
+  <td><button onclick="this.closest('tr').remove();recalc()" class="small">X</button></td>`;
+  document.querySelector('#itemsTable tbody').appendChild(tr);
+  tr.querySelectorAll('input').forEach(i=>i.addEventListener('input',recalc));
+  recalc();
+}
+function recalc(){
+  let t=0;
+  document.querySelectorAll('#itemsTable tbody tr').forEach(r=>{
+    const q=+r.querySelector('.qty').value||0;
+    const rt=+r.querySelector('.rate').value||0;
+    const a=q*rt; r.querySelector('.amt').innerText=a.toFixed(2); t+=a;
+  });
+  document.getElementById('total').innerText=t.toFixed(2);
+  const adv=+document.getElementById('advance').value||0;
+  document.getElementById('out').innerText=(t-adv).toFixed(2);
+}
+document.getElementById('advance').addEventListener('input',recalc);
+addRow();
+
+/* ---------------- Helpers ---------------- */
+function nextEstimateId(){return String(Date.now());}
+document.getElementById('estNo').value=nextEstimateId();
+
+function buildCurrent(){
+  const items=[];document.querySelectorAll('#itemsTable tbody tr').forEach(r=>{
+    items.push({part:r.querySelector('.part').value,qty:r.querySelector('.qty').value,rate:r.querySelector('.rate').value,amt:r.querySelector('.amt').innerText});
+  });
+  return {
+    estNo:document.getElementById('estNo').value,
+    customer:document.getElementById('custName').value,
+    phone:document.getElementById('phone').value,
+    delivery:document.getElementById('delivery').value,
+    total:document.getElementById('total').innerText,
+    advance:document.getElementById('advance').value,
+    outstanding:document.getElementById('out').innerText,
+    status:'Pending',
+    timestamp:new Date().toLocaleString(),
+    items
   };
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
+}
 
-  /********** Items auto-suggestions **********/
-  const itemsList = [
-    "Bill Book",
-    "Visiting Card",
-    "Flex Banner",
-    "Sticker",
-    "Invitation Card",
-    "Letterhead",
-    "Receipt Book",
-    "ID Card",
-    "Vinyl Printing",
-    "Pamphlet",
-    "Poster",
-    "Envelope",
-    "Glow Sign Board",
-    "Business Card (English)",
-    "Business Card (Gujarati)",
-    "Sticker (Vinyl)"
-  ];
-  // create datalist element for suggestions
-  const dl = document.createElement('datalist');
-  dl.id = 'itemSuggestions';
-  itemsList.forEach(i => { const opt = document.createElement('option'); opt.value = i; dl.appendChild(opt); });
-  document.body.appendChild(dl);
+/* ---------------- Save Online ---------------- */
+function saveOnline(){
+  const data=buildCurrent();
+  db.ref('estimates/'+data.estNo).set(data,err=>{
+    if(err)alert('Error: '+err);
+    else{alert('✅ Saved: '+data.estNo);document.getElementById('estNo').value=nextEstimateId();}
+  });
+}
 
-  /********** Add rows, recalc **********/
-  function addRow(part = '', qty = 1, rate = 0) {
-    const tbody = document.querySelector('#itemsTable tbody');
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td><input class="part" list="itemSuggestions" value="${escapeHtml(part)}" placeholder="Type or select item"></td>
-      <td><input class="qty" type="number" min="0" value="${qty}"></td>
-      <td><input class="rate" type="number" min="0" value="${rate}"></td>
-      <td class="amt">0.00</td>
-      <td><button onclick="this.closest('tr').remove(); recalc()" class="small">Delete</button></td>
-    `;
-    tbody.appendChild(tr);
-    tr.querySelectorAll('input').forEach(inp => inp.addEventListener('input', recalc));
-    recalc();
-  }
+/* ---------------- Shared list ---------------- */
+function renderSavedList(s){
+  const data=s.val()||{};const tb=document.querySelector('#savedTable tbody');tb.innerHTML='';
+  Object.values(data).sort((a,b)=>b.estNo.localeCompare(a.estNo)).forEach(e=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${e.estNo}</td><td>${e.customer||''}</td>
+    <td class="right">₹${e.total}</td><td class="right">₹${e.outstanding}</td>
+    <td contenteditable oninput="db.ref('estimates/${e.estNo}/status').set(this.innerText)">${e.status||'Pending'}</td>
+    <td><button onclick="loadEstimate('${e.estNo}')" class="small">Load</button> <button onclick="db.ref('estimates/${e.estNo}').remove()" class="small">Del</button></td>`;
+    tb.appendChild(tr);
+  });
+}
+db.ref('estimates').on('value',renderSavedList);
 
-  function recalc(){
-    let total = 0;
-    document.querySelectorAll('#itemsTable tbody tr').forEach(r=>{
-      const qty = parseFloat(r.querySelector('.qty').value) || 0;
-      const rate = parseFloat(r.querySelector('.rate').value) || 0;
-      const amt = qty * rate;
-      r.querySelector('.amt').innerText = amt.toFixed(2);
-      total += amt;
+/* ---------------- Load Existing ---------------- */
+function loadEstimate(id){
+  db.ref('estimates/'+id).once('value').then(s=>{
+    const e=s.val();if(!e)return alert('Not found');
+    document.getElementById('estNo').value=e.estNo;
+    document.getElementById('custName').value=e.customer;
+    document.getElementById('phone').value=e.phone;
+    document.getElementById('delivery').value=e.delivery;
+    document.getElementById('advance').value=e.advance;
+    document.querySelector('#itemsTable tbody').innerHTML='';
+    (e.items||[]).forEach(it=>addRow(it.part,it.qty,it.rate));
+    recalc();window.scrollTo({top:0,behavior:'smooth'});
+  });
+}
+
+/* ---------------- Excel Download ---------------- */
+function downloadAll(){
+  db.ref('estimates').once('value').then(s=>{
+    const d=s.val();if(!d)return alert('No records');
+    const aoa=[['MOHAMMADI PRINTING PRESS - KHAMBHAT'],[]];
+    Object.values(d).forEach(e=>{
+      aoa.push(['Estimate #'+e.estNo,'', '', '', e.timestamp]);
+      aoa.push(['Customer',e.customer,'','','Phone: '+e.phone]);
+      aoa.push(['Delivery',e.delivery]);
+      aoa.push(['Total',e.total,'','','Advance: '+e.advance]);
+      aoa.push(['Outstanding',e.outstanding]);
+      aoa.push(['Status',e.status]);
+      aoa.push(['Particulars','Qty','Rate','Amount']);
+      (e.items||[]).forEach(it=>aoa.push([it.part,it.qty,it.rate,it.amt]));
+      aoa.push([]);
     });
-    document.getElementById('total').innerText = total.toFixed(2);
-    const adv = parseFloat(document.getElementById('advance').value) || 0;
-    document.getElementById('out').innerText = (total - adv).toFixed(2);
-  }
+    const wb=XLSX.utils.book_new(),ws=XLSX.utils.aoa_to_sheet(aoa);
+    XLSX.utils.book_append_sheet(wb,ws,'Estimates');XLSX.writeFile(wb,'Estimates.xlsx');
+  });
+}
 
-  document.getElementById('advance').addEventListener('input', recalc);
+/* ---------------- Print ---------------- */
+function printEstimate(){
+  recalc();const e=buildCurrent();const w=window.open('','','width=900,height=1000');
+  let h=`<html><head><meta charset="utf-8"><title>Estimate #${e.estNo}</title></head><body style="font-family:Arial;">`;
+  h+=`<div style="text-align:center;"><img src="https://raw.githubusercontent.com/Sunil2002zxhxd/ESTIMATE-new/main/7376b61a-b491-497f-b65c-4e6ecb7e522a.png" style="width:140px;"><h2>MOHAMMADI PRINTING PRESS - KHAMBHAT</h2></div>`;
+  h+=`<p><b>Estimate No:</b> ${e.estNo}<br><b>Customer:</b> ${e.customer}<br><b>Phone:</b> ${e.phone}<br><b>Delivery:</b> ${e.delivery}</p>`;
+  h+=`<table style="width:100%;border-collapse:collapse;" border="1"><tr><th>Particulars (વસ્તુ)</th><th>Qty</th><th>Rate ₹</th><th>Amount ₹</th></tr>`;
+  (e.items||[]).forEach(it=>h+=`<tr><td>${it.part}</td><td>${it.qty}</td><td>${it.rate}</td><td>${it.amt}</td></tr>`);
+  h+=`</table><p><b>Total:</b> ₹${e.total}<br><b>Advance:</b> ₹${e.advance}<br><b>Outstanding:</b> ₹${e.outstanding}</p><hr><p>મોહંમદી પ્રિન્ટીંગ પ્રેસ<br>ખંભાત - 388620<br>મો.9825547625</p></body></html>`;
+  w.document.write(h);w.document.close();w.print();
+}
 
-  // helper to escape quotes in value
-  function escapeHtml(text){
-    if(!text) return '';
-    return text.replace(/"/g, '&quot;');
-  }
-
-  // Start with one blank row
-  addRow();
-
-  /********** Generate estimate id (timestamp) and show **********/
-  function nextEstimateId(){
-    return String(Date.now());
-  }
-  document.getElementById('estNo').value = nextEstimateId();
-
-  /********** Build current estimate object **********/
-  function buildCurrent(){
-    const items = [];
-    document.querySelectorAll('#itemsTable tbody tr').forEach(r=>{
-      items.push({
-        part: r.querySelector('.part').value || '',
-        qty: r.querySelector('.qty').value || '0',
-        rate: r.querySelector('.rate').value || '0',
-        amt: r.querySelector('.amt').innerText || '0.00'
-      });
-    });
-    return {
-      estNo: document.getElementById('estNo').value,
-      customer: document.getElementById('custName').value,
-      phone: document.getElementById('phone').value,
-      delivery: document.getElementById('delivery').value,
-      total: document.getElementById('total').innerText,
-      advance: document.getElementById('advance').value,
-      outstanding: document.getElementById('out').innerText,
-      status: 'Pending',
-      timestamp: new Date().toLocaleString(),
-      items
-    };
-  }
-
-  /********** Save online (to Firebase Realtime DB) **********/
-  function saveOnline(){
-    const data = buildCurrent();
-    if(!data.customer){
-      if(!confirm('Customer name is empty — save anyway?')) return;
-    }
-    // Write to: estimates/{estNo}
-    db.ref('estimates/' + data.estNo).set(data, err => {
-      if(err) alert('Error saving: ' + err);
-      else {
-        alert('✅ Estimate saved online: #' + data.estNo);
-        document.getElementById('estNo').value = nextEstimateId();
-      }
-    });
-  }
-
-  /********** Listen for changes & render saved table (shared) **********/
-  function renderSavedList(snapshot){
-    const data = snapshot.val() || {};
-    const tbody = document.querySelector('#savedTable tbody');
-    tbody.innerHTML = '';
-    // convert to array sorted by timestamp (optional)
-    const arr = Object.values(data).sort((a,b) => (a.estNo > b.estNo ? -1 : 1));
-    arr.forEach(est => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${est.estNo}</td>
-        <td>${escapeForTable(est.customer)}</td>
-        <td class="right">₹${est.total}</td>
-        <td class="right">₹${est.outstanding}</td>
-        <td contenteditable="true" oninput="updateStatus('${est.estNo}', this.innerText)">${escapeForTable(est.status||'Pending')}</td>
-        <td><button onclick="loadEstimate('${est.estNo}')" class="small">Load</button> <button onclick="deleteEstimate('${est.estNo}')" class="small">Delete</button></td>
-      `;
-      tbody.appendChild(tr);
-    });
-  }
-
-  db.ref('estimates').on('value', renderSavedList);
-
-  function escapeForTable(s){ return (s||'').toString().replace(/</g,'&lt;'); }
-
-  function updateStatus(id, val){
-    db.ref('estimates/' + id + '/status').set(val);
-  }
-
-  function deleteEstimate(id){
-    if(!confirm('Delete estimate #' + id + ' ?')) return;
-    db.ref('estimates/' + id).remove();
-  }
-
-  /********** Load an existing estimate into form for edit/print/send **********/
-  function loadEstimate(id){
-    db.ref('estimates/' + id).once('value').then(snap=>{
-      const est = snap.val();
-      if(!est) { alert('Not found'); return; }
-      document.getElementById('estNo').value = est.estNo;
-      document.getElementById('custName').value = est.customer;
-      document.getElementById('phone').value = est.phone;
-      document.getElementById('delivery').value = est.delivery;
-      document.getElementById('advance').value = est.advance || '0';
-      // clear rows
-      document.querySelector('#itemsTable tbody').innerHTML = '';
-      (est.items || []).forEach(it => addRow(it.part, it.qty, it.rate));
-      recalc();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
-  }
-
-  /********** Download all estimates as Excel (XLSX) **********/
-  function downloadAll(){
-    db.ref('estimates').once('value').then(snap=>{
-      const data = snap.val();
-      if(!data){ alert('No saved estimates'); return; }
-      const aoa = [];
-      aoa.push(['MOHAMMADI PRINTING PRESS - KHAMBHAT']); aoa.push([]);
-      Object.values(data).forEach(est => {
-        aoa.push([`Estimate #${est.estNo}`, '', '', '', `Saved: ${est.timestamp}`]);
-        aoa.push(['Customer', est.customer, '', '', 'Phone: ' + est.phone]);
-        aoa.push(['Delivery', est.delivery]);
-        aoa.push(['Total', est.total, '', '', 'Advance: ' + est.advance]);
-        aoa.push(['Outstanding', est.outstanding]);
-        aoa.push(['Status', est.status]);
-        aoa.push(['Particulars', 'Qty', 'Rate', 'Amount']);
-        (est.items || []).forEach(it => aoa.push([it.part, it.qty, it.rate, it.amt]));
-        aoa.push([]);
-      });
-      const wb = XLSX.utils.book_new();
-      const ws = XLSX.utils.aoa_to_sheet(aoa);
-      XLSX.utils.book_append_sheet(wb, ws, 'All Estimates');
-      XLSX.writeFile(wb, 'Mohammadi_Press_Estimates.xlsx');
-    });
-  }
-
-  /********** Print (English + Gujarati) **********/
-  function printEstimate(){
-    recalc();
-    const est = buildCurrent();
-    const w = window.open('', '', 'width=900,height=1000');
-    let html = `<html><head><title>Estimate #${est.estNo}</title><meta charset="utf-8"></head><body style="font-family:Arial;">`;
-    html += `<div style="text-align:center;"><img src="https://raw.githubusercontent.com/Sunil2002zxhxd/ESTIMATE-new/main/7376b61a-b491-497f-b65c-4e6ecb7e522a.png" style="width:140px;"><h2>MOHAMMADI PRINTING PRESS - KHAMBHAT</h2></div>`;
-    html += `<p><b>Estimate No (અંદાજ):</b> ${est.estNo}<br>`;
-    html += `<b>Customer (ગ્રાહક):</b> ${escapeForTable(est.customer)}<br>`;
-    html += `<b>Phone (ફોન):</b> ${escapeForTable(est.phone)}<br>`;
-    html += `<b>Delivery (ડિલિવરી):</b> ${escapeForTable(est.delivery)}</p>`;
-    // create items table
-    html += `<table style="width:100%;border-collapse:collapse;" border="1"><tr><th>Particulars (વસ્તુ)</th><th>Qty (જથ્થો)</th><th>Rate (દર ₹)</th><th>Amount (રકમ ₹)</th></tr>`;
-    (est.items || []).forEach(it => {
-      html += `<tr><td>${escapeForTable(it.part)}</td><td class="right">${it.qty}</td><td class="right">₹${it.rate}</td><td class="right">₹${it.amt}</td></tr>`;
-    });
-    html += `</table>`;
-    html += `<p><b>Total (કુલ):</b> ₹${est.total}<br><b>Advance (એડવાન્સ):</b> ₹${est.advance}<br><b>Outstanding (બાકી):</b> ₹${est.outstanding}</p>`;
-    html += `<hr><p>મોહંમદી પ્રિન્ટીંગ પ્રેસ<br>ખંભાત - 388620<br>મો.9825547625</p>`;
-    html += `</body></html>`;
-    w.document.write(html);
-    w.document.close();
-    w.print();
-  }
-
-  /********** WhatsApp send (opens wa web / mobile) **********/
-  function openWhatsApp(){
-    recalc();
-    const est = buildCurrent();
-    const phone = (est.phone || '').replace(/\D/g,'');
-    if(!phone){ alert('Enter phone number'); return; }
-    let msg = `*MOHAMMADI PRINTING PRESS - KHAMBHAT*\n\n*ESTIMATE #${est.estNo}*\n*Customer (ગ્રાહક):* ${est.customer}\n\n*Particulars (વસ્તુઓ):*\n`;
-    (est.items || []).forEach(it => {
-      msg += `• ${it.part}\n   Qty: ${it.qty}\n   Rate: ₹${it.rate}\n   Amt: ₹${it.amt}\n\n`;
-    });
-    msg += `*Total (કુલ):* ₹${est.total}\n*Advance (એડવાન્સ):* ₹${est.advance}\n*Outstanding (બાકી):* ₹${est.outstanding}\n*Delivery (ડિલિવરી):* ${est.delivery}\n\nમોહંમદી પ્રિન્ટીંગ પ્રેસ\nમો.9825547625`;
-    // Use wa.me short link
-    const url = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
-    window.open(url,'_blank');
-  }
-
-  /********** Utility: load saved on start if any **********/
-  // Already listening via db.ref('estimates').on('value', ...)
-  // But ensure single blank row
-  // (initial estNo already set above)
-
-  // Escape helper safe usage
-  function escapeForTable(s){ return (s||'').toString().replace(/</g,'&lt;'); }
-
-  // Done
+/* ---------------- WhatsApp ---------------- */
+function openWhatsApp(){
+  recalc();const e=buildCurrent();const p=(e.phone||'').replace(/\D/g,'');
+  if(!p)return alert('Enter phone');let m=`*MOHAMMADI PRINTING PRESS - KHAMBHAT*\n\n*Estimate #${e.estNo}*\n*Customer:* ${e.customer}\n\n`;
+  (e.items||[]).forEach(it=>m+=`• ${it.part} | Qty:${it.qty} | Rate:₹${it.rate} | Amt:₹${it.amt}\n`);
+  m+=`\n*Total:* ₹${e.total}\n*Advance:* ₹${e.advance}\n*Outstanding:* ₹${e.outstanding}\n*Delivery:* ${e.delivery}\n\nમોહંમદી પ્રિન્ટીંગ પ્રેસ\nમો.9825547625`;
+  window.open(`https://wa.me/${p}?text=${encodeURIComponent(m)}`,'_blank');
+}
 </script>
 </body>
 </html>
