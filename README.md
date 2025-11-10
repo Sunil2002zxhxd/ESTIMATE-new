@@ -7,10 +7,9 @@
     body {
       margin: 0;
       font-family: Arial, sans-serif;
-      /* ✅ Background logo full display */
-      background: url('https://raw.githubusercontent.com/Sunil2002zxhxd/ESTIMATE-new/main/1000227416.jpg') no-repeat center center fixed;
+      background: url('https://raw.githubusercontent.com/Sunil2002zxhxd/ESTIMATE-new/main/7376b61a-b491-497f-b65c-4e6ecb7e522a.png') no-repeat center center fixed;
       background-size: cover;
-      backdrop-filter: blur(2px);
+      backdrop-filter: blur(3px);
     }
     #page {
       max-width: 900px;
@@ -52,6 +51,7 @@
       gap: 10px;
       flex-wrap: wrap;
       margin-top: 12px;
+      justify-content: center;
     }
     #savedTable {
       margin-top: 20px;
@@ -68,7 +68,7 @@
 </head>
 <body>
   <div id="page">
-    <h2>MOHAMMADI PRINTING PRESS - KHAMBHAT</h2>
+    <h2 style="text-align:center;">MOHAMMADI PRINTING PRESS - KHAMBHAT</h2>
 
     <label>Estimate Number</label>
     <input id="estNo" placeholder="Auto generated" readonly>
@@ -243,10 +243,8 @@ function printEstimate(){
   const out=document.getElementById('out').innerText;
   const delivery=document.getElementById('delivery').value;
   let w=window.open('', '', 'width=800,height=900');
-  w.document.write(`<html><head><title>Estimate #${estNo}</title></head><body>`);
-  /* ✅ Print ma logo add */
-  w.document.write(`<img src='https://raw.githubusercontent.com/Sunil2002zxhxd/ESTIMATE-new/main/1000227416.jpg' style='position:absolute;right:20px;top:20px;width:120px;'>`);
-  w.document.write(`<h2>MOHAMMADI PRINTING PRESS - KHAMBHAT</h2>`);
+  w.document.write(`<html><head><title>Estimate #${estNo}</title></head><body style="font-family:Arial;">`);
+  w.document.write(`<div style='text-align:center;'><img src='https://raw.githubusercontent.com/Sunil2002zxhxd/ESTIMATE-new/main/7376b61a-b491-497f-b65c-4e6ecb7e522a.png' style='width:120px;'><h2>MOHAMMADI PRINTING PRESS - KHAMBHAT</h2></div>`);
   w.document.write(`<p><b>Estimate No:</b> ${estNo}</p>`);
   w.document.write(`<p><b>Customer:</b> ${cust}</p>`);
   w.document.write(document.getElementById('itemsTable').outerHTML);
@@ -266,4 +264,24 @@ function openWhatsApp(){
   const phone=document.getElementById('phone').value.trim();
   const estNo=document.getElementById('estNo').value;
   if(!phone){alert('Enter phone number!');return;}
-  let msg=`*MOHAMMADI PRINTING PRESS - KHAMBHAT*\n\n*ESTIMATE #*
+  let msg=`*MOHAMMADI PRINTING PRESS - KHAMBHAT*\n\n*ESTIMATE #${estNo}*\n`;
+  msg+=`*Customer:* ${cust}\n\n*Particulars:*\n`;
+  document.querySelectorAll('#itemsTable tbody tr').forEach(r=>{
+    const part=r.querySelector('.part').value;
+    const q=r.querySelector('.qty').value;
+    const rate=r.querySelector('.rate').value;
+    const amt=r.querySelector('.amt').innerText;
+    msg+=`• ${part}\n   Qty: ${q}\n   Rate: ₹${rate}\n   Amt: ₹${amt}\n\n`;
+  });
+  const total=document.getElementById('total').innerText;
+  const adv=document.getElementById('advance').value;
+  const out=document.getElementById('out').innerText;
+  const delivery=document.getElementById('delivery').value;
+  msg+=`*Total:* ₹${total}\n*Advance:* ₹${adv}\n*Outstanding:* ₹${out}\n*Delivery:* ${delivery}\n\n*મોહંમદી પ્રિન્ટીંગ પ્રેસ*\nમો.9825547625`;
+
+  const url=`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+  window.open(url,'_blank');
+}
+</script>
+</body>
+</html>
