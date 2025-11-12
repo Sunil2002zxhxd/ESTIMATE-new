@@ -104,8 +104,8 @@
   </datalist>
 
 <script>
-const scriptURL = (https://docs.google.com/spreadsheets/d/1Np5u5ihK99IrtY8a70o9bkc45_M6ODFKH1biV_pzCLE/edit?usp=sharing)
-
+const scriptURL = [(https://docs.google.com/spreadsheets/d/1Np5u5ihK99IrtY8a70o9bkc45_M6ODFKH1biV_pzCLE/edit?usp=sharing)
+](https://docs.google.com/spreadsheets/d/1Np5u5ihK99IrtY8a70o9bkc45_M6ODFKH1biV_pzCLE/edit?gid=1421097968#gid=1421097968)
 let estNo = Date.now();
 document.getElementById("estNo").value = estNo;
 
