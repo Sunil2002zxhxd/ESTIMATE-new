@@ -120,7 +120,7 @@
 const firebaseConfig = {
   apiKey: "AIzaSyB7mjbXykKBaOoHYrUkZcLfMTX_2n3HVE8",
   authDomain: "mohammadi-press-estimate.firebaseapp.com",
-  databaseURL: "https://mohammadi-press-estimate-default-rtdb.firebaseio.com",
+  databaseURL: "[https://mohammadi-press-estimate-default-rtdb.firebaseio.com",](https://docs.google.com/spreadsheets/d/1-F6bgHHz3OY5TPf-hxxzHfOxIKuCGcIKn7yEpBToGbQ/edit?gid=0#gid=0)
   projectId: "mohammadi-press-estimate",
   storageBucket: "mohammadi-press-estimate.appspot.com",
   messagingSenderId: "1071377650825",
