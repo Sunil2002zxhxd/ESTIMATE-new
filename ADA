@@ -1,0 +1,18 @@
+function doPost(e) {
+  const sheet = SpreadsheetApp.openById(AKfycbwa83jX1XdWm3GrDhPM9e4iHxkpLAJo0c HS7igrrpsm8D3JLA4iYaAvtNCv74vqgStcKA).getSheetByName("Sheet1");
+  const data = JSON.parse(e.postData.contents);
+  sheet.appendRow([
+    new Date(),
+    data.estNo,
+    data.custName,
+    data.phone,
+    data.delivery,
+    data.total,
+    data.advance,
+    data.outstanding,
+    data.status,
+    data.time,
+    JSON.stringify(data.items)
+  ]);
+  return ContentService.createTextOutput("✅ Data Saved Successfully!");
+}
