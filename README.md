@@ -33,16 +33,10 @@
     #savedTable { margin-top:14px; width:100%; background:white; border-collapse:collapse; }
     #savedTable th, #savedTable td { border:1px solid #ccc; padding:8px; }
     .right { text-align:right; }
-    .note { font-size:13px; color:#555; margin-top:8px; }
-    @media (max-width:600px){
-      #page{margin:8px;padding:12px}
-      .controls{flex-direction:column}
-    }
+    #statusMsg { margin-top:10px; font-weight:bold; text-align:center; }
+    .success { color:green; }
+    .error { color:red; }
   </style>
-
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
   <div id="page">
@@ -79,19 +73,13 @@
 
     <div class="controls">
       <button onclick="saveOnline()">💾 Save</button>
-      <button onclick="downloadAll()" class="secondary">⬇️ Excel</button>
       <button onclick="printEstimate()" class="warn">🖨️ Print</button>
-      <button onclick="openWhatsApp()">💬 WhatsApp</button>
+      <button onclick="openWhatsApp()">💬 Order Ready</button>
     </div>
 
-    <h3>Saved Estimates</h3>
-    <table id="savedTable">
-      <thead><tr><th>No.</th><th>Customer</th><th>Total</th><th>Outstanding</th><th>Status</th></tr></thead>
-      <tbody></tbody>
-    </table>
+    <div id="statusMsg"></div>
   </div>
 
-  <!-- Suggestion List for Printing Items -->
   <datalist id="printItems">
     <option>Visiting Card</option>
     <option>Bill Book</option>
@@ -116,18 +104,7 @@
   </datalist>
 
 <script>
-/* ---------------- Firebase Config ---------------- */
-const firebaseConfig = {
-  apiKey: "AIzaSyB7mjbXykKBaOoHYrUkZcLfMTX_2n3HVE8",
-  authDomain: "mohammadi-press-estimate.firebaseapp.com",
-  databaseURL: "[https://mohammadi-press-estimate-default-rtdb.firebaseio.com",](https://docs.google.com/spreadsheets/d/1-F6bgHHz3OY5TPf-hxxzHfOxIKuCGcIKn7yEpBToGbQ/edit?gid=0#gid=0)
-  projectId: "mohammadi-press-estimate",
-  storageBucket: "mohammadi-press-estimate.appspot.com",
-  messagingSenderId: "1071377650825",
-  appId: "1:1071377650825:web:48677a9fedba43b30b6258"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+const scriptURL = (https://docs.google.com/spreadsheets/d/1Np5u5ihK99IrtY8a70o9bkc45_M6ODFKH1biV_pzCLE/edit?usp=sharing)
 
 let estNo = Date.now();
 document.getElementById("estNo").value = estNo;
@@ -185,35 +162,22 @@ function saveOnline() {
     });
   });
 
-  db.ref("estimates/" + estNo).set(data, err => {
-    if (err) alert("❌ Error saving: " + err);
-    else {
-      alert("✅ Estimate Saved Successfully!");
-      loadSaved();
-    }
-  });
-}
+  document.getElementById("statusMsg").innerHTML = "⏳ Saving...";
 
-function loadSaved() {
-  const tbody = document.querySelector("#savedTable tbody");
-  tbody.innerHTML = "";
-  db.ref("estimates").once("value", snap => {
-    let i = 1;
-    snap.forEach(ch => {
-      const d = ch.val();
-      const tr = document.createElement("tr");
-      tr.innerHTML = `
-        <td>${i++}</td>
-        <td>${d.custName}</td>
-        <td>₹${d.total}</td>
-        <td>₹${d.outstanding}</td>
-        <td>${d.status}</td>
-      `;
-      tbody.appendChild(tr);
-    });
+  fetch(scriptURL, {
+    method: "POST",
+    body: JSON.stringify(data)
+  })
+  .then(res => res.text())
+  .then(txt => {
+    document.getElementById("statusMsg").innerHTML = "✅ Saved Successfully!";
+    document.getElementById("statusMsg").className = "success";
+  })
+  .catch(err => {
+    document.getElementById("statusMsg").innerHTML = "❌ Error: " + err.message;
+    document.getElementById("statusMsg").className = "error";
   });
 }
-loadSaved();
 
 function openWhatsApp() {
   const name = document.getElementById("custName").value;
@@ -225,17 +189,6 @@ function openWhatsApp() {
 }
 
 function printEstimate() { window.print(); }
-
-function downloadAll() {
-  db.ref("estimates").once("value", snap => {
-    const data = [];
-    snap.forEach(ch => data.push(ch.val()));
-    const ws = XLSX.utils.json_to_sheet(data);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Estimates");
-    XLSX.writeFile(wb, "Estimates.xlsx");
-  });
-}
 </script>
 </body>
 </html>
