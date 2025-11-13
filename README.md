@@ -78,6 +78,14 @@
     </div>
 
     <div id="statusMsg"></div>
+
+    <h3>Saved Estimates</h3>
+    <table id="savedTable">
+      <thead>
+        <tr><th>Date</th><th>Estimate No</th><th>Customer</th><th>Phone</th><th>Total</th><th>Status</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
   </div>
 
   <datalist id="printItems">
@@ -104,8 +112,8 @@
   </datalist>
 
 <script>
-const scriptURL = [(https://docs.google.com/spreadsheets/d/1Np5u5ihK99IrtY8a70o9bkc45_M6ODFKH1biV_pzCLE/edit?usp=sharing)
-](https://docs.google.com/spreadsheets/d/1Np5u5ihK99IrtY8a70o9bkc45_M6ODFKH1biV_pzCLE/edit?gid=1421097968#gid=1421097968)
+const scriptURL = 'YOUR_WEB_APP_URL_HERE';
+
 let estNo = Date.now();
 document.getElementById("estNo").value = estNo;
 
@@ -172,11 +180,33 @@ function saveOnline() {
   .then(txt => {
     document.getElementById("statusMsg").innerHTML = "✅ Saved Successfully!";
     document.getElementById("statusMsg").className = "success";
+    loadSaved();
   })
   .catch(err => {
     document.getElementById("statusMsg").innerHTML = "❌ Error: " + err.message;
     document.getElementById("statusMsg").className = "error";
   });
+}
+
+function loadSaved() {
+  fetch(scriptURL)
+    .then(r => r.json())
+    .then(rows => {
+      const tbody = document.querySelector("#savedTable tbody");
+      tbody.innerHTML = "";
+      rows.slice(1).reverse().forEach(r => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${r[0]}</td>
+          <td>${r[1]}</td>
+          <td>${r[2]}</td>
+          <td>${r[3]}</td>
+          <td>₹${r[6]}</td>
+          <td contenteditable="true">${r[9] || "Pending"}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    });
 }
 
 function openWhatsApp() {
@@ -189,6 +219,8 @@ function openWhatsApp() {
 }
 
 function printEstimate() { window.print(); }
+
+window.onload = loadSaved;
 </script>
 </body>
 </html>
