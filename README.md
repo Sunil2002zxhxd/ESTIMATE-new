@@ -27,7 +27,6 @@
     th { background:#f5f5f5; }
     .controls { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-top:12px; }
     button { padding:10px 14px; border:none; border-radius:6px; background:#0078D7; color:white; font-weight:700; cursor:pointer; }
-    button.secondary { background:#28a745; }
     button.warn { background:#f39c12; }
     .small { padding:6px 10px; font-size:13px; }
     #savedTable { margin-top:14px; width:100%; background:white; border-collapse:collapse; }
@@ -112,7 +111,7 @@
   </datalist>
 
 <script>
-const scriptURL = 'YOUR_WEB_APP_URL_HERE';
+const scriptURL = "YOUR_SCRIPT_URL_HERE";
 
 let estNo = Date.now();
 document.getElementById("estNo").value = estNo;
@@ -158,8 +157,7 @@ function saveOnline() {
     total: parseFloat(document.getElementById("total").textContent),
     outstanding: parseFloat(document.getElementById("out").textContent),
     items: [],
-    status: "Pending",
-    time: new Date().toLocaleString()
+    status: "Pending"
   };
   document.querySelectorAll("#itemsTable tbody tr").forEach(tr => {
     const tds = tr.querySelectorAll("input");
@@ -176,14 +174,14 @@ function saveOnline() {
     method: "POST",
     body: JSON.stringify(data)
   })
-  .then(res => res.text())
+  .then(r => r.text())
   .then(txt => {
     document.getElementById("statusMsg").innerHTML = "✅ Saved Successfully!";
     document.getElementById("statusMsg").className = "success";
     loadSaved();
   })
   .catch(err => {
-    document.getElementById("statusMsg").innerHTML = "❌ Error: " + err.message;
+    document.getElementById("statusMsg").innerHTML = "❌ " + err.message;
     document.getElementById("statusMsg").className = "error";
   });
 }
@@ -202,7 +200,7 @@ function loadSaved() {
           <td>${r[2]}</td>
           <td>${r[3]}</td>
           <td>₹${r[6]}</td>
-          <td contenteditable="true">${r[9] || "Pending"}</td>
+          <td>${r[9]}</td>
         `;
         tbody.appendChild(tr);
       });
