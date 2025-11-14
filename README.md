@@ -44,6 +44,14 @@
     <label>Estimate Number</label>
     <input id="estNo" readonly>
 
+    <label>Operator Name</label>
+    <select id="operator">
+      <option value="murtuzabhai">Murtuzabhai</option>
+      <option value="sunilbhai">Sunilbhai</option>
+      <option value="kiranbhai">Kiranbhai</option>
+      <option value="mihirbhai">Mihirbhai</option>
+    </select>
+
     <label>Customer Name</label>
     <input id="custName" placeholder="Customer name">
 
@@ -56,7 +64,7 @@
     <h3>Items</h3>
     <table id="itemsTable">
       <thead>
-        <tr><th>Particulars</th><th>Qty</th><th>Rate</th><th>Amount</th><th></th></tr>
+        <tr><th>Particulars</th><th>Description</th><th>Qty</th><th>Rate</th><th>Amount</th><th></th></tr>
       </thead>
       <tbody></tbody>
     </table>
@@ -70,10 +78,20 @@
       <strong>Outstanding: ₹<span id="out">0.00</span></strong>
     </div>
 
+    <label>Status</label>
+    <select id="status">
+      <option>Order Sars</option>
+      <option>Job in Design</option>
+      <option>In Processing</option>
+      <option>Binding</option>
+      <option>Job Ready</option>
+    </select>
+
     <div class="controls">
       <button onclick="saveOnline()">💾 Save</button>
       <button onclick="printEstimate()" class="warn">🖨️ Print</button>
-      <button onclick="openWhatsApp()">💬 Order Ready</button>
+      <button onclick="openWhatsAppJob()">💬 Job Ready Msg</button>
+      <button onclick="openWhatsAppOrder()">💬 Order Booked</button>
     </div>
 
     <div id="statusMsg"></div>
@@ -87,29 +105,6 @@
     </table>
   </div>
 
-  <datalist id="printItems">
-    <option>Visiting Card</option>
-    <option>Bill Book</option>
-    <option>Letterhead</option>
-    <option>Receipt Book</option>
-    <option>Envelope</option>
-    <option>Poster</option>
-    <option>Sticker</option>
-    <option>Flex Banner</option>
-    <option>Vinyl</option>
-    <option>ID Card</option>
-    <option>Tag</option>
-    <option>Book Binding</option>
-    <option>Invitation Card</option>
-    <option>Marriage Card</option>
-    <option>Brochure</option>
-    <option>Catalogue</option>
-    <option>Certificate</option>
-    <option>Diary Print</option>
-    <option>Notebook</option>
-    <option>Carry Bag</option>
-  </datalist>
-
 <script>
 const scriptURL = "YOUR_SCRIPT_URL_HERE";
 
@@ -120,22 +115,23 @@ function addRow() {
   const tbody = document.querySelector("#itemsTable tbody");
   const tr = document.createElement("tr");
   tr.innerHTML = `
-    <td><input list="printItems" placeholder="Select or type item"></td>
+    <td><input list="printItems" placeholder="Item"></td>
+    <td><textarea placeholder="Job Description"></textarea></td>
     <td><input type="number" value="1" min="1"></td>
     <td><input type="number" value="0" step="0.01"></td>
     <td class="right amount">0.00</td>
     <td><button onclick="this.parentElement.parentElement.remove(); recalc();">❌</button></td>
   `;
   tbody.appendChild(tr);
-  tr.querySelectorAll("input").forEach(i => i.addEventListener("input", recalc));
+  tr.querySelectorAll("input, textarea").forEach(i => i.addEventListener("input", recalc));
   recalc();
 }
 
 function recalc() {
   let total = 0;
   document.querySelectorAll("#itemsTable tbody tr").forEach(tr => {
-    const qty = parseFloat(tr.children[1].querySelector("input").value) || 0;
-    const rate = parseFloat(tr.children[2].querySelector("input").value) || 0;
+    const qty = parseFloat(tr.children[2].querySelector("input").value) || 0;
+    const rate = parseFloat(tr.children[3].querySelector("input").value) || 0;
     const amt = qty * rate;
     tr.querySelector(".amount").textContent = amt.toFixed(2);
     total += amt;
@@ -150,21 +146,23 @@ function saveOnline() {
   recalc();
   const data = {
     estNo,
+    operator: document.getElementById("operator").value,
     custName: document.getElementById("custName").value,
     phone: document.getElementById("phone").value,
     delivery: document.getElementById("delivery").value,
     advance: parseFloat(document.getElementById("advance").value),
     total: parseFloat(document.getElementById("total").textContent),
     outstanding: parseFloat(document.getElementById("out").textContent),
-    items: [],
-    status: "Pending"
+    status: document.getElementById("status").value,
+    items: []
   };
+
   document.querySelectorAll("#itemsTable tbody tr").forEach(tr => {
-    const tds = tr.querySelectorAll("input");
     data.items.push({
-      item: tds[0].value,
-      qty: tds[1].value,
-      rate: tds[2].value
+      item: tr.children[0].querySelector("input").value,
+      desc: tr.children[1].querySelector("textarea").value,
+      qty: tr.children[2].querySelector("input").value,
+      rate: tr.children[3].querySelector("input").value
     });
   });
 
@@ -207,12 +205,19 @@ function loadSaved() {
     });
 }
 
-function openWhatsApp() {
-  const name = document.getElementById("custName").value;
+function openWhatsAppJob() {
   const phone = document.getElementById("phone").value;
   const total = document.getElementById("total").textContent;
   const outstanding = document.getElementById("out").textContent;
-  const msg = `📢 *Dear ${name},*\n🧾 Your printing order is *READY!* ✅\n\n💰 Total: ₹${total}\n💵 Pending: ₹${outstanding}\n\nThank you for choosing *MOHAMMADI PRESS - KHAMBHAT* 🙏`;
+  const msg = `📢 Your printing job is READY!\n\n💰 Total: ₹${total}\n💵 Pending: ₹${outstanding}\n\nMOHAMMADI PRESS - KHAMBHAT`;
+  window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`);
+}
+
+function openWhatsAppOrder() {
+  const name = document.getElementById("custName").value;
+  const phone = document.getElementById("phone").value;
+
+  const msg = `📄 Dear ${name},\nYour order is booked successfully! 🙏\nMOHAMMADI PRESS - KHAMBHAT`;
   window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`);
 }
 
