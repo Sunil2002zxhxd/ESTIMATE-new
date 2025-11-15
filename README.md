@@ -1,3 +1,4 @@
+<!-- Save this as public/index.html -->
 <!doctype html>
 <html>
 <head>
@@ -5,225 +6,411 @@
   <title>MOHAMMADI PRESS - Estimate System</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: url('https://raw.githubusercontent.com/Sunil2002zxhxd/ESTIMATE-new/main/7376b61a-b491-497f-b65c-4e6ecb7e522a.png') no-repeat center center fixed;
-      background-size: cover;
-    }
-    #page {
-      max-width: 980px;
-      margin: 18px auto;
-      padding: 18px;
-      background-color: rgba(255,255,255,0.94);
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    }
-    h2 { text-align:center; margin:6px 0 12px 0; }
-    label { display:block; margin-top:8px; font-weight:600; }
-    input, textarea, select { width:100%; padding:8px; margin-top:6px; box-sizing:border-box; }
-    table { width:100%; border-collapse:collapse; margin-top:10px; background:white; }
-    th, td { border:1px solid #ddd; padding:6px; text-align:left; }
-    th { background:#f5f5f5; }
-    .controls { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; margin-top:12px; }
-    button { padding:10px 14px; border:none; border-radius:6px; background:#0078D7; color:white; font-weight:700; cursor:pointer; }
-    button.warn { background:#f39c12; }
-    .small { padding:6px 10px; font-size:13px; }
-    #savedTable { margin-top:14px; width:100%; background:white; border-collapse:collapse; }
-    #savedTable th, #savedTable td { border:1px solid #ccc; padding:8px; }
-    .right { text-align:right; }
-    #statusMsg { margin-top:10px; font-weight:bold; text-align:center; }
-    .success { color:green; }
-    .error { color:red; }
+    :root{--accent:#0078D7;--warn:#f39c12}
+    @page { size: A5; margin: 10mm; }
+    body { margin:0; font-family:Arial; color:#111; background:#f6f6f6; }
+    #page{max-width:980px;margin:18px auto;padding:18px;background:rgba(255,255,255,0.98);border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,0.08)}
+    .top-row{display:flex;gap:12px;align-items:center}
+    #logoWrap{width:120px;height:80px;display:flex;align-items:center;justify-content:center;border-radius:8px;overflow:hidden;background:#fff;padding:6px}
+    #logo{max-width:100%;max-height:100%;display:block}
+    h2{margin:0;font-size:20px}
+    label{display:block;margin-top:8px;font-weight:600}
+    input,textarea,select{width:100%;padding:8px;margin-top:6px;box-sizing:border-box;border:1px solid #ddd;border-radius:6px}
+    table{width:100%;border-collapse:collapse;margin-top:10px;background:white}
+    th,td{border:1px solid #e6e6e6;padding:8px;text-align:left;vertical-align:top}
+    th{background:#fafafa}
+    button{padding:10px 14px;border:none;border-radius:6px;background:var(--accent);color:white;font-weight:700;cursor:pointer}
+    button.warn{background:var(--warn)}
+    .small{padding:6px 10px;font-size:13px}
+    .right{text-align:right}
+    #statusMsg{margin-top:10px;font-weight:bold;text-align:center}
+    .success{color:green}.error{color:red}
+    textarea{min-height:48px;resize:vertical}
+    .controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+    .muted{color:#666;font-size:13px}
+    .saved-actions{display:flex;gap:6px}
+    .big-input{font-size:18px;padding:8px}
+    @media(max-width:700px){.top-row{flex-direction:column;align-items:flex-start}#logoWrap{width:100%;height:80px}}
   </style>
 </head>
 <body>
   <div id="page">
-    <h2>MOHAMMADI PRINTING PRESS - KHAMBHAT</h2>
+    <div class="top-row">
+      <div id="logoWrap"><img id="logo" src="logo.png" alt="logo"></div>
+      <div style="flex:1">
+        <h2>MOHAMMADI PRINTING PRESS - KHAMBHAT</h2>
+        <div class="muted">Operators: Murtuzabhai, Sunilbhai, Kiranbhai, Mihirbhai</div>
+      </div>
+      <div style="width:160px">
+        <label style="font-weight:600">Upload Logo (optional)</label>
+        <input id="logoInput" type="file" accept="image/*">
+      </div>
+    </div>
 
-    <label>Estimate Number</label>
-    <input id="estNo" readonly>
+    <div style="display:grid;grid-template-columns:120px 1fr 220px;gap:12px;align-items:center;margin-top:12px">
+      <div>
+        <label>Estimate No.</label>
+        <input id="estNo" readonly>
+      </div>
+      <div>
+        <label>Customer Name</label>
+        <input id="custName" placeholder="Customer name">
+      </div>
+      <div>
+        <label>Date & Time</label>
+        <input id="dateTime" readonly>
+      </div>
+    </div>
 
-    <label>Operator Name</label>
-    <select id="operator">
-      <option value="murtuzabhai">Murtuzabhai</option>
-      <option value="sunilbhai">Sunilbhai</option>
-      <option value="kiranbhai">Kiranbhai</option>
-      <option value="mihirbhai">Mihirbhai</option>
-    </select>
+    <div style="display:grid;grid-template-columns:1fr 220px;gap:12px">
+      <div>
+        <label>Phone</label>
+        <input id="phone" placeholder="91XXXXXXXXXX">
+      </div>
+      <div>
+        <label>Operator (Order Taken By)</label>
+        <select id="operator">
+          <option value="">Select Operator</option>
+          <option>Murtuzabhai</option>
+          <option>Sunilbhai</option>
+          <option>Kiranbhai</option>
+          <option>Mihirbhai</option>
+        </select>
+      </div>
+    </div>
 
-    <label>Customer Name</label>
-    <input id="custName" placeholder="Customer name">
+    <div style="display:grid;grid-template-columns:1fr 220px;gap:12px;margin-top:6px">
+      <div>
+        <label>Delivery Days / Notes</label>
+        <input id="delivery" placeholder="e.g. 2/3 or notes">
+      </div>
+      <div>
+        <label>Advance Paid</label>
+        <input id="advance" value="0" type="number">
+      </div>
+    </div>
 
-    <label>Phone</label>
-    <input id="phone" placeholder="91XXXXXXXXXX">
-
-    <label>Delivery Days</label>
-    <input id="delivery" placeholder="e.g. 2/3">
-
-    <h3>Items</h3>
+    <h3 style="margin-top:14px">Items</h3>
     <table id="itemsTable">
       <thead>
-        <tr><th>Particulars</th><th>Description</th><th>Qty</th><th>Rate</th><th>Amount</th><th></th></tr>
+        <tr><th style="width:35%">Particulars</th><th>Description</th><th style="width:100px">Qty</th><th style="width:120px">Rate</th><th style="width:120px">Amount</th><th></th></tr>
       </thead>
       <tbody></tbody>
     </table>
-    <div><button onclick="addRow()" class="small">+ Add item</button></div>
 
-    <label>Advance Paid</label>
-    <input id="advance" value="0" type="number">
-
-    <div>
-      <strong>Total: ₹<span id="total">0.00</span></strong><br>
-      <strong>Outstanding: ₹<span id="out">0.00</span></strong>
+    <div style="margin-top:8px;display:flex;gap:8px">
+      <button id="addBtn" class="small">+ Add item</button>
+      <button id="whatsappEstimateBtn" class="small" style="background:#25D366">📤 Send Estimate (WhatsApp)</button>
+      <div style="flex:1"></div>
+      <div style="width:220px">
+        <strong>Total: ₹<span id="total">0.00</span></strong><br>
+        <strong>Outstanding: ₹<span id="out">0.00</span></strong>
+      </div>
     </div>
 
-    <label>Status</label>
-    <select id="status">
-      <option>Order Sars</option>
-      <option>Job in Design</option>
-      <option>In Processing</option>
-      <option>Binding</option>
-      <option>Job Ready</option>
-    </select>
-
     <div class="controls">
-      <button onclick="saveOnline()">💾 Save</button>
-      <button onclick="printEstimate()" class="warn">🖨️ Print</button>
-      <button onclick="openWhatsAppJob()">💬 Job Ready Msg</button>
-      <button onclick="openWhatsAppOrder()">💬 Order Booked</button>
+      <button id="saveBtn">💾 Save</button>
+      <button id="printBtn" class="warn">🖨️ Print</button>
+      <button id="orderBtn">💬 Order Success</button>
+      <button id="readyBtn">💬 Job Ready</button>
+      <div style="flex:1"></div>
+      <div class="muted">Saved estimates show below (local fallback if online script not set)</div>
     </div>
 
     <div id="statusMsg"></div>
 
-    <h3>Saved Estimates</h3>
+    <h3 style="margin-top:18px">Saved Estimates</h3>
     <table id="savedTable">
       <thead>
-        <tr><th>Date</th><th>Estimate No</th><th>Customer</th><th>Phone</th><th>Total</th><th>Status</th></tr>
+        <tr><th>Date</th><th>Est No</th><th>Customer</th><th>Phone</th><th>Total</th><th>Status</th><th>Operator</th><th>Actions</th></tr>
       </thead>
       <tbody></tbody>
     </table>
+
   </div>
 
+  <datalist id="printItems">
+    <option>Visiting Card</option>
+    <option>Bill Book</option>
+    <option>Letterhead</option>
+    <option>Receipt Book</option>
+    <option>Envelope</option>
+    <option>Poster</option>
+    <option>Sticker</option>
+    <option>Flex Banner</option>
+    <option>Vinyl</option>
+    <option>ID Card</option>
+    <option>Tag</option>
+    <option>Book Binding</option>
+    <option>Invitation Card</option>
+    <option>Marriage Card</option>
+    <option>Brochure</option>
+    <option>Catalogue</option>
+    <option>Certificate</option>
+    <option>Diary Print</option>
+    <option>Notebook</option>
+    <option>Carry Bag</option>
+  </datalist>
+
 <script>
-const scriptURL = "YOUR_SCRIPT_URL_HERE";
+/* CONFIG */
+const scriptURL = "YOUR_SCRIPT_URL_HERE"; // replace with Apps Script endpoint if you have one
+const LOCAL_KEY = 'mohammadi_estimates_v1';
+const LOGO_KEY = 'mohammadi_logo_v1';
 
-let estNo = Date.now();
-document.getElementById("estNo").value = estNo;
+/* Utilities */
+function escapeHtml(text){ if(text === undefined || text === null) return ''; return String(text).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function pad(num, size){ return String(num).padStart(size, '0'); }
 
-function addRow() {
-  const tbody = document.querySelector("#itemsTable tbody");
-  const tr = document.createElement("tr");
-  tr.innerHTML = `
-    <td><input list="printItems" placeholder="Item"></td>
-    <td><textarea placeholder="Job Description"></textarea></td>
-    <td><input type="number" value="1" min="1"></td>
-    <td><input type="number" value="0" step="0.01"></td>
-    <td class="right amount">0.00</td>
-    <td><button onclick="this.parentElement.parentElement.remove(); recalc();">❌</button></td>
-  `;
+/* Add row */
+window.addRow = function(){
+  const tbody = document.querySelector('#itemsTable tbody');
+  const tr = document.createElement('tr');
+  tr.innerHTML = '\
+    <td>\
+      <input list="printItems" class="part-name" placeholder="Item name" />\
+      <br>\
+      <textarea class="part-desc" placeholder="Description (job details)"></textarea>\
+    </td>\
+    <td></td>\
+    <td><input class="big-input qty" type="number" value="1" min="1" /></td>\
+    <td><input class="big-input rate" type="number" value="0" step="0.01" /></td>\
+    <td class="right amount">0.00</td>\
+    <td><button type="button" class="del-row">❌</button></td>\
+  ';
   tbody.appendChild(tr);
-  tr.querySelectorAll("input, textarea").forEach(i => i.addEventListener("input", recalc));
-  recalc();
-}
 
-function recalc() {
+  const nameEl = tr.querySelector('.part-name');
+  const descEl = tr.querySelector('.part-desc');
+  const descCell = tr.children[1];
+  descCell.innerHTML = '';
+  descCell.appendChild(descEl);
+
+  tr.querySelectorAll('input, textarea').forEach(i=>i.addEventListener('input', recalc));
+  tr.querySelector('.del-row').addEventListener('click', ()=>{ tr.remove(); recalc(); });
+  recalc();
+};
+
+window.recalc = function(){
   let total = 0;
-  document.querySelectorAll("#itemsTable tbody tr").forEach(tr => {
-    const qty = parseFloat(tr.children[2].querySelector("input").value) || 0;
-    const rate = parseFloat(tr.children[3].querySelector("input").value) || 0;
+  document.querySelectorAll('#itemsTable tbody tr').forEach(tr=>{
+    const qtyEl = tr.querySelector('.qty');
+    const rateEl = tr.querySelector('.rate');
+    const qty = parseFloat(qtyEl && qtyEl.value) || 0;
+    const rate = parseFloat(rateEl && rateEl.value) || 0;
     const amt = qty * rate;
-    tr.querySelector(".amount").textContent = amt.toFixed(2);
+    const amtEl = tr.querySelector('.amount'); if(amtEl) amtEl.textContent = amt.toFixed(2);
     total += amt;
   });
-  document.getElementById("total").textContent = total.toFixed(2);
-  const adv = parseFloat(document.getElementById("advance").value) || 0;
-  document.getElementById("out").textContent = (total - adv).toFixed(2);
-}
-document.getElementById("advance").addEventListener("input", recalc);
+  document.getElementById('total').textContent = total.toFixed(2);
+  const adv = parseFloat(document.getElementById('advance').value) || 0;
+  document.getElementById('out').textContent = (total - adv).toFixed(2);
+};
 
-function saveOnline() {
+window.collectItems = function(){
+  const items = [];
+  document.querySelectorAll('#itemsTable tbody tr').forEach(tr=>{
+    const name = tr.querySelector('.part-name') ? tr.querySelector('.part-name').value : '';
+    const desc = tr.querySelector('.part-desc') ? tr.querySelector('.part-desc').value : '';
+    const qty = tr.querySelector('.qty') ? tr.querySelector('.qty').value : 0;
+    const rate = tr.querySelector('.rate') ? tr.querySelector('.rate').value : 0;
+    const amt = tr.querySelector('.amount') ? tr.querySelector('.amount').textContent : '0.00';
+    items.push({item:name, desc, qty, rate, amt});
+  });
+  return items;
+};
+
+window.persistLocal = function(data){
+  try{ const arr = JSON.parse(localStorage.getItem(LOCAL_KEY) || '[]'); arr.push(data); localStorage.setItem(LOCAL_KEY, JSON.stringify(arr)); }catch(e){console.error(e);} 
+};
+
+window.loadSaved = function(){
+  const tbody = document.querySelector('#savedTable tbody'); tbody.innerHTML = '';
+  const local = JSON.parse(localStorage.getItem(LOCAL_KEY) || '[]').slice().reverse();
+  local.forEach((r, idx)=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = '\
+      <td>' + escapeHtml(r.date||'') + '</td>\
+      <td>' + escapeHtml(String(r.estNo||'')) + '</td>\
+      <td>' + escapeHtml(r.custName||'') + '</td>\
+      <td>' + escapeHtml(r.phone||'') + '</td>\
+      <td>₹' + (Number(r.total||0).toFixed(2)) + '</td>\
+      <td>' + escapeHtml(r.status||'') + '</td>\
+      <td>' + escapeHtml(r.operator||'') + '</td>\
+      <td class="saved-actions"><button data-idx="' + idx + '" class="editBtn">Edit</button><button data-idx="' + idx + '" class="delBtn">Delete</button></td>\
+    ';
+    tbody.appendChild(tr);
+  });
+
+  tbody.querySelectorAll('.editBtn').forEach(b=>b.addEventListener('click', e=>{ window.loadIntoForm(Number(e.target.dataset.idx)); }));
+  tbody.querySelectorAll('.delBtn').forEach(b=>b.addEventListener('click', e=>{ window.removeLocal(Number(e.target.dataset.idx)); }));
+};
+
+window.loadIntoForm = function(localIndex){
+  const arr = JSON.parse(localStorage.getItem(LOCAL_KEY) || '[]').slice().reverse();
+  const data = arr[localIndex]; if(!data) return;
+  document.getElementById('estNo').value = data.estNo || '';
+  document.getElementById('custName').value = data.custName || '';
+  document.getElementById('phone').value = data.phone || '';
+  document.getElementById('operator').value = data.operator || '';
+  document.getElementById('delivery').value = data.delivery || '';
+  document.getElementById('advance').value = data.advance || 0;
+
+  const tbody = document.querySelector('#itemsTable tbody'); tbody.innerHTML = '';
+  (data.items||[]).forEach(it=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = '\
+      <td><input list="printItems" class="part-name" value="' + escapeHtml(it.item) + '" /><br><textarea class="part-desc">' + escapeHtml(it.desc) + '</textarea></td>\
+      <td></td>\
+      <td><input class="big-input qty" type="number" value="' + (it.qty || 0) + '" /></td>\
+      <td><input class="big-input rate" type="number" value="' + (it.rate || 0) + '" step="0.01" /></td>\
+      <td class="right amount">' + (Number(it.amt)||0).toFixed(2) + '</td>\
+      <td><button type="button" class="del-row">❌</button></td>\
+    ';
+    tbody.appendChild(tr);
+    tr.querySelectorAll('input, textarea').forEach(i=>i.addEventListener('input', recalc));
+    tr.querySelector('.del-row').addEventListener('click', ()=>{ tr.remove(); recalc(); });
+  });
   recalc();
+};
+
+window.removeLocal = function(localIndex){
+  let arr = JSON.parse(localStorage.getItem(LOCAL_KEY) || '[]').slice().reverse();
+  arr.splice(localIndex,1);
+  arr = arr.reverse();
+  localStorage.setItem(LOCAL_KEY, JSON.stringify(arr));
+  loadSaved();
+};
+
+window.openWhatsAppSuccess = function(){
+  recalc();
+  const name = document.getElementById('custName').value || '';
+  const phone = document.getElementById('phone').value || '';
+  const total = document.getElementById('total').textContent || '0.00';
+  const advance = document.getElementById('advance').value || '0';
+  const outstanding = document.getElementById('out').textContent || '0.00';
+
+  let itemMsg = '';
+  document.querySelectorAll('#itemsTable tbody tr').forEach(tr=>{
+    const name = tr.querySelector('.part-name') ? tr.querySelector('.part-name').value : '';
+    const desc = tr.querySelector('.part-desc') ? tr.querySelector('.part-desc').value : '';
+    const qty = tr.querySelector('.qty') ? tr.querySelector('.qty').value : '';
+    const rate = tr.querySelector('.rate') ? tr.querySelector('.rate').value : '';
+    const amt = tr.querySelector('.amount') ? tr.querySelector('.amount').textContent : '0.00';
+    if(name) itemMsg += '• ' + name + '\n' + (desc ? '   ' + desc + '\n' : '') + '   Qty: ' + qty + '\n   Rate: ₹' + rate + '\n   Amt: ₹' + amt + '\n\n';
+  });
+
+  const msg = 'MOHAMMADI PRINTING PRESS - KHAMBHAT\n\nYour order is booked successfully!\nESTIMATE #' + document.getElementById('estNo').value + '\nCustomer: ' + name + '\n\nParticulars:\n' + itemMsg + 'Total: ₹' + total + '\nAdvance: ₹' + advance + '\nOutstanding: ₹' + outstanding + '\n\nમોહંમદી પ્રિન્ટીંગ પ્રેસ\nમો.9825547625';
+  if(phone) window.open('https://wa.me/' + encodeURIComponent(phone) + '?text=' + encodeURIComponent(msg));
+};
+
+window.openWhatsAppReady = function(){
+  recalc();
+  const phone = document.getElementById('phone').value || '';
+  const total = document.getElementById('total').textContent || '0.00';
+  const advance = document.getElementById('advance').value || '0';
+  const outstanding = document.getElementById('out').textContent || '0.00';
+  const msg = '📢 Dear customer, your job is ready!\n\nTotal: ₹' + total + '\nAdvance: ₹' + advance + '\nOutstanding: ₹' + outstanding + '\n\nMOHAMMADI PRINTING PRESS - KHAMBHAT';
+  if(phone) window.open('https://wa.me/' + encodeURIComponent(phone) + '?text=' + encodeURIComponent(msg));
+};
+
+// Send Estimate (compact) to WhatsApp
+window.sendEstimateWhatsApp = function(){
+  recalc();
+  const name = document.getElementById('custName').value || '';
+  const phone = document.getElementById('phone').value || '';
+  const total = document.getElementById('total').textContent || '0.00';
+  const advance = document.getElementById('advance').value || '0';
+  const outstanding = document.getElementById('out').textContent || '0.00';
+  let itemMsg = '';
+  document.querySelectorAll('#itemsTable tbody tr').forEach(tr=>{
+    const name = tr.querySelector('.part-name') ? tr.querySelector('.part-name').value : '';
+    const qty = tr.querySelector('.qty') ? tr.querySelector('.qty').value : '';
+    const rate = tr.querySelector('.rate') ? tr.querySelector('.rate').value : '';
+    const amt = tr.querySelector('.amount') ? tr.querySelector('.amount').textContent : '0.00';
+    if(name) itemMsg += '• ' + name + '  Qty:' + qty + '  Rate:₹' + rate + '  Amt:₹' + amt + '\n';
+  });
+  const msg = '*MOHAMMADI PRINTING PRESS - KHAMBHAT*\n*ESTIMATE #' + document.getElementById('estNo').value + '*\nCustomer: ' + name + '\n\n' + itemMsg + '\nTotal: ₹' + total + '\nAdvance: ₹' + advance + '\nOutstanding: ₹' + outstanding;
+  if(phone) window.open('https://wa.me/' + encodeURIComponent(phone) + '?text=' + encodeURIComponent(msg));
+};
+
+window.saveOnline = function(){
+  recalc();
+
+  // generate persistent estimate number at save time (001,002...)
+  let last = Number(localStorage.getItem('last_est_no') || 0);
+  last = last + 1; localStorage.setItem('last_est_no', last);
+  const estNo = pad(last,3);
+  document.getElementById('estNo').value = estNo;
+
   const data = {
-    estNo,
-    operator: document.getElementById("operator").value,
-    custName: document.getElementById("custName").value,
-    phone: document.getElementById("phone").value,
-    delivery: document.getElementById("delivery").value,
-    advance: parseFloat(document.getElementById("advance").value),
-    total: parseFloat(document.getElementById("total").textContent),
-    outstanding: parseFloat(document.getElementById("out").textContent),
-    status: document.getElementById("status").value,
-    items: []
+    date: new Date().toLocaleString(),
+    estNo: estNo,
+    custName: document.getElementById('custName').value || '',
+    phone: document.getElementById('phone').value || '',
+    operator: document.getElementById('operator').value || '',
+    delivery: document.getElementById('delivery').value || '',
+    advance: parseFloat(document.getElementById('advance').value) || 0,
+    total: parseFloat(document.getElementById('total').textContent) || 0,
+    outstanding: parseFloat(document.getElementById('out').textContent) || 0,
+    status: 'Order Received',
+    items: collectItems()
   };
 
-  document.querySelectorAll("#itemsTable tbody tr").forEach(tr => {
-    data.items.push({
-      item: tr.children[0].querySelector("input").value,
-      desc: tr.children[1].querySelector("textarea").value,
-      qty: tr.children[2].querySelector("input").value,
-      rate: tr.children[3].querySelector("input").value
-    });
-  });
+  document.getElementById('statusMsg').textContent = '⏳ Saving...';
 
-  document.getElementById("statusMsg").innerHTML = "⏳ Saving...";
-
-  fetch(scriptURL, {
-    method: "POST",
-    body: JSON.stringify(data)
-  })
-  .then(r => r.text())
-  .then(txt => {
-    document.getElementById("statusMsg").innerHTML = "✅ Saved Successfully!";
-    document.getElementById("statusMsg").className = "success";
-    loadSaved();
-  })
-  .catch(err => {
-    document.getElementById("statusMsg").innerHTML = "❌ " + err.message;
-    document.getElementById("statusMsg").className = "error";
-  });
-}
-
-function loadSaved() {
-  fetch(scriptURL)
-    .then(r => r.json())
-    .then(rows => {
-      const tbody = document.querySelector("#savedTable tbody");
-      tbody.innerHTML = "";
-      rows.slice(1).reverse().forEach(r => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${r[0]}</td>
-          <td>${r[1]}</td>
-          <td>${r[2]}</td>
-          <td>${r[3]}</td>
-          <td>₹${r[6]}</td>
-          <td>${r[9]}</td>
-        `;
-        tbody.appendChild(tr);
+  // Try server first (single row expected). If not configured, fallback to localStorage
+  if(scriptURL && scriptURL !== 'YOUR_SCRIPT_URL_HERE'){
+    fetch(scriptURL, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data)})
+      .then(r=>r.text()).then(txt=>{
+        document.getElementById('statusMsg').textContent = '✅ Saved to server';
+        document.getElementById('statusMsg').className = 'success';
+        persistLocal(data); loadSaved();
+      }).catch(err=>{
+        document.getElementById('statusMsg').textContent = '⚠️ Server save failed — saved locally';
+        document.getElementById('statusMsg').className = 'error';
+        persistLocal(data); loadSaved();
       });
-    });
-}
+  } else {
+    persistLocal(data);
+    document.getElementById('statusMsg').textContent = '✅ Saved locally';
+    document.getElementById('statusMsg').className = 'success';
+    loadSaved();
+  }
+};
 
-function openWhatsAppJob() {
-  const phone = document.getElementById("phone").value;
-  const total = document.getElementById("total").textContent;
-  const outstanding = document.getElementById("out").textContent;
-  const msg = `📢 Your printing job is READY!\n\n💰 Total: ₹${total}\n💵 Pending: ₹${outstanding}\n\nMOHAMMADI PRESS - KHAMBHAT`;
-  window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`);
-}
+window.printEstimate = function(){ window.print(); };
 
-function openWhatsAppOrder() {
-  const name = document.getElementById("custName").value;
-  const phone = document.getElementById("phone").value;
+window.handleLogoUpload = function(e){
+  const f = e.target.files && e.target.files[0]; if(!f) return; const reader = new FileReader();
+  reader.onload = function(evt){ const data = evt.target.result; document.getElementById('logo').src = data; try{ localStorage.setItem(LOGO_KEY, data) }catch(e){} };
+  reader.readAsDataURL(f);
+};
 
-  const msg = `📄 Dear ${name},\nYour order is booked successfully! 🙏\nMOHAMMADI PRESS - KHAMBHAT`;
-  window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`);
-}
+// attach DOM handlers after content loaded
+document.addEventListener('DOMContentLoaded', ()=>{
+  // preview next estimate number (does not consume number until save)
+  const lastPreview = Number(localStorage.getItem('last_est_no') || 0);
+  document.getElementById('estNo').value = pad(lastPreview + 1, 3);
+  // set date & time auto
+  document.getElementById('dateTime').value = new Date().toLocaleString();
 
-function printEstimate() { window.print(); }
-
-window.onload = loadSaved;
+  // load logo (logo.png in public folder or uploaded)
+  const logoData = localStorage.getItem(LOGO_KEY); if(logoData) document.getElementById('logo').src = logoData;
+  // wire controls to global funcs
+  document.getElementById('addBtn').addEventListener('click', ()=>window.addRow());
+  document.getElementById('saveBtn').addEventListener('click', ()=>window.saveOnline());
+  document.getElementById('printBtn').addEventListener('click', ()=>window.printEstimate());
+  document.getElementById('orderBtn').addEventListener('click', ()=>window.openWhatsAppSuccess());
+  document.getElementById('readyBtn').addEventListener('click', ()=>window.openWhatsAppReady());
+  document.getElementById('whatsappEstimateBtn').addEventListener('click', ()=>window.sendEstimateWhatsApp());
+  document.getElementById('logoInput').addEventListener('change', window.handleLogoUpload);
+  document.getElementById('advance').addEventListener('input', ()=>window.recalc());
+  // ensure at least one row exists
+  if(document.querySelectorAll('#itemsTable tbody tr').length === 0) window.addRow();
+  // load saved entries
+  window.loadSaved();
+});
 </script>
 </body>
 </html>
