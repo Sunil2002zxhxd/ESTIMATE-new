@@ -1,18 +1,50 @@
 function doPost(e) {
-  const sheet = SpreadsheetApp.openById(AKfycbwa83jX1XdWm3GrDhPM9e4iHxkpLAJo0c HS7igrrpsm8D3JLA4iYaAvtNCv74vqgStcKA).getSheetByName("Sheet1");
-  const data = JSON.parse(e.postData.contents);
+  /* IMPORTANT: Replace YOUR_SPREADSHEET_ID with your actual Google Spreadsheet ID */
+  const sheet = SpreadsheetApp.openById("YOUR_SPREADSHEET_ID").getSheetByName("Sheet1");
+
+  var data;
+  try {
+    data = JSON.parse(e.postData.contents);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({message: "Invalid request format"}))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+
+  var requiredFields = ["estNo", "custName", "phone", "total", "advance", "outstanding"];
+  for (var i = 0; i < requiredFields.length; i++) {
+    if (data[requiredFields[i]] === undefined || data[requiredFields[i]] === null) {
+      return ContentService.createTextOutput(JSON.stringify({message: "Missing required field: " + requiredFields[i]}))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+  }
+
+  var sanitized = {
+    estNo: String(data.estNo).substring(0, 50),
+    custName: String(data.custName).substring(0, 200),
+    phone: String(data.phone).replace(/[^\d+\-() ]/g, "").substring(0, 20),
+    delivery: String(data.delivery || "").substring(0, 100),
+    total: String(data.total).substring(0, 20),
+    advance: String(data.advance).substring(0, 20),
+    outstanding: String(data.outstanding).substring(0, 20),
+    status: String(data.status || "").substring(0, 50),
+    time: String(data.time || "").substring(0, 50),
+    items: Array.isArray(data.items) ? JSON.stringify(data.items).substring(0, 5000) : "[]"
+  };
+
   sheet.appendRow([
     new Date(),
-    data.estNo,
-    data.custName,
-    data.phone,
-    data.delivery,
-    data.total,
-    data.advance,
-    data.outstanding,
-    data.status,
-    data.time,
-    JSON.stringify(data.items)
+    sanitized.estNo,
+    sanitized.custName,
+    sanitized.phone,
+    sanitized.delivery,
+    sanitized.total,
+    sanitized.advance,
+    sanitized.outstanding,
+    sanitized.status,
+    sanitized.time,
+    sanitized.items
   ]);
-  return ContentService.createTextOutput("✅ Data Saved Successfully!");
+
+  return ContentService.createTextOutput(JSON.stringify({message: "Data Saved Successfully"}))
+    .setMimeType(ContentService.MimeType.JSON);
 }

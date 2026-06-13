@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <title>MOHAMMADI PRESS - Shared Estimate</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' https://raw.githubusercontent.com; connect-src https://script.google.com;">
 <style>
 body{margin:0;font-family:Arial;background:url('https://raw.githubusercontent.com/Sunil2002zxhxd/ESTIMATE-new/main/7376b61a-b491-497f-b65c-4e6ecb7e522a.png') no-repeat center center fixed;background-size:cover;backdrop-filter:blur(2px);}
 #page{max-width:980px;margin:18px auto;padding:18px;background:rgba(255,255,255,0.94);border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.15);}
@@ -61,7 +62,8 @@ button.warn{background:#f39c12;}
 </div>
 
 <script>
-const SCRIPT_URL="https://script.google.com/macros/s/AKfycbwDcUzHKb6Nboc1Fs2lxufGq1wpROoH149X-ZwmW3178HOCLLFGPkOw32BrJv5rFWt6jQ/exec
+/* IMPORTANT: Replace YOUR_DEPLOYMENT_ID with your actual Google Apps Script deployment ID */
+const SCRIPT_URL="https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec";
 
 /* Items suggestions */
 const itemsList=["Bill Book","Visiting Card","Flex Banner","Sticker","Invitation Card","Letterhead","Receipt Book","ID Card","Vinyl Printing","Pamphlet","Poster","Envelope","Glow Sign Board","Business Card (English)","Business Card (Gujarati)","Sticker (Vinyl)"];
@@ -70,11 +72,20 @@ itemsList.forEach(i=>{let o=document.createElement('option');o.value=i;dl.append
 document.body.appendChild(dl);
 
 /* Table rows */
+function sanitize(str){
+  const d=document.createElement('div');
+  d.appendChild(document.createTextNode(str));
+  return d.innerHTML;
+}
+
 function addRow(part='',qty=1,rate=0){
   const tr=document.createElement('tr');
-  tr.innerHTML=`<td><input class="part" list="itemSuggestions" value="${part}"></td>
-  <td><input class="qty" type="number" value="${qty}" min="1"></td>
-  <td><input class="rate" type="number" value="${rate}" min="0"></td>
+  const safePart=sanitize(String(part));
+  const safeQty=parseInt(qty,10)||1;
+  const safeRate=parseFloat(rate)||0;
+  tr.innerHTML=`<td><input class="part" list="itemSuggestions" value="${safePart}"></td>
+  <td><input class="qty" type="number" value="${safeQty}" min="1"></td>
+  <td><input class="rate" type="number" value="${safeRate}" min="0"></td>
   <td class="amt">0.00</td>
   <td><button onclick="this.closest('tr').remove();recalc()" class="small">X</button></td>`;
   document.querySelector('#itemsTable tbody').appendChild(tr);
@@ -102,23 +113,27 @@ addRow();
 function nextEstimateId(){return String(Date.now());}
 document.getElementById('estNo').value=nextEstimateId();
 
+function validatePhone(p){
+  return /^\d{10,15}$/.test(p.replace(/\D/g,''));
+}
+
 function buildCurrent(){
   const items=[];
   document.querySelectorAll('#itemsTable tbody tr').forEach(r=>{
     items.push({
-      part:r.querySelector('.part').value,
-      qty:r.querySelector('.qty').value,
-      rate:r.querySelector('.rate').value,
+      part:sanitize(r.querySelector('.part').value),
+      qty:parseInt(r.querySelector('.qty').value,10)||0,
+      rate:parseFloat(r.querySelector('.rate').value)||0,
       amt:r.querySelector('.amt').innerText
     });
   });
   return {
-    estNo:document.getElementById('estNo').value,
-    customer:document.getElementById('custName').value,
-    phone:document.getElementById('phone').value,
-    delivery:document.getElementById('delivery').value,
+    estNo:sanitize(document.getElementById('estNo').value),
+    customer:sanitize(document.getElementById('custName').value),
+    phone:sanitize(document.getElementById('phone').value),
+    delivery:sanitize(document.getElementById('delivery').value),
     total:document.getElementById('total').innerText,
-    advance:document.getElementById('advance').value,
+    advance:parseFloat(document.getElementById('advance').value)||0,
     outstanding:document.getElementById('out').innerText,
     items
   };
@@ -128,12 +143,15 @@ function buildCurrent(){
 function saveOnline(){
   const data=buildCurrent();
   if(!data.customer){alert('Enter Customer Name');return;}
+  if(data.phone && !validatePhone(data.phone)){alert('Enter a valid phone number (10-15 digits)');return;}
+  if(SCRIPT_URL.includes('YOUR_DEPLOYMENT_ID')){alert('Configure SCRIPT_URL with your Google Apps Script deployment ID');return;}
   fetch(SCRIPT_URL,{
     method:'POST',
+    headers:{'Content-Type':'application/json'},
     body:JSON.stringify(data)
   }).then(r=>r.json())
-  .then(res=>alert(res.message||'✅ Saved successfully'))
-  .catch(e=>alert('❌ Error: '+e));
+  .then(res=>alert(res.message||'Saved successfully'))
+  .catch(()=>alert('Error saving estimate. Please try again.'));
 }
 
 /* Print */
@@ -144,9 +162,9 @@ function printEstimate(){
   let h=`<html><head><meta charset="utf-8"><title>Estimate #${e.estNo}</title></head>
   <body style="font-family:Arial;padding:20px;">`;
   h+=`<h2 style="text-align:center;">MOHAMMADI PRINTING PRESS - KHAMBHAT</h2>`;
-  h+=`<p><b>Estimate No:</b> ${e.estNo}<br><b>Customer:</b> ${e.customer}<br><b>Phone:</b> ${e.phone}<br><b>Delivery:</b> ${e.delivery}</p>`;
+  h+=`<p><b>Estimate No:</b> ${sanitize(e.estNo)}<br><b>Customer:</b> ${sanitize(e.customer)}<br><b>Phone:</b> ${sanitize(e.phone)}<br><b>Delivery:</b> ${sanitize(e.delivery)}</p>`;
   h+=`<table style="width:100%;border-collapse:collapse;" border="1"><tr><th>Particulars</th><th>Qty</th><th>Rate ₹</th><th>Amount ₹</th></tr>`;
-  (e.items||[]).forEach(it=>h+=`<tr><td>${it.part}</td><td>${it.qty}</td><td>${it.rate}</td><td>${it.amt}</td></tr>`);
+  (e.items||[]).forEach(it=>h+=`<tr><td>${sanitize(it.part)}</td><td>${sanitize(String(it.qty))}</td><td>${sanitize(String(it.rate))}</td><td>${sanitize(it.amt)}</td></tr>`);
   h+=`</table><p><b>Total:</b> ₹${e.total}<br><b>Advance:</b> ₹${e.advance}<br><b>Outstanding:</b> ₹${e.outstanding}</p>`;
   h+=`<hr><p style="text-align:center;">મોહંમદી પ્રિન્ટીંગ પ્રેસ<br>ખંભાત - 388620<br>મો.9825547625</p></body></html>`;
   w.document.write(h); w.document.close(); w.print();
