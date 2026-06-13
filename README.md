@@ -61,13 +61,50 @@ button.warn{background:#f39c12;}
 </div>
 
 <script>
+/* ── Shared Config ── */
+const BIZ={
+  name:'MOHAMMADI PRINTING PRESS - KHAMBHAT',
+  nameGuj:'મોહંમદી પ્રિન્ટીંગ પ્રેસ',
+  city:'ખંભાત - 388620',
+  phone:'9825547625'
+};
 const SCRIPT_URL="https://script.google.com/macros/s/AKfycbwDcUzHKb6Nboc1Fs2lxufGq1wpROoH149X-ZwmW3178HOCLLFGPkOw32BrJv5rFWt6jQ/exec
+
+/* ── Cached DOM refs ── */
+const DOM={
+  estNo:    document.getElementById('estNo'),
+  custName: document.getElementById('custName'),
+  phone:    document.getElementById('phone'),
+  delivery: document.getElementById('delivery'),
+  advance:  document.getElementById('advance'),
+  total:    document.getElementById('total'),
+  out:      document.getElementById('out'),
+  tbody:    document.querySelector('#itemsTable tbody')
+};
 
 /* Items suggestions */
 const itemsList=["Bill Book","Visiting Card","Flex Banner","Sticker","Invitation Card","Letterhead","Receipt Book","ID Card","Vinyl Printing","Pamphlet","Poster","Envelope","Glow Sign Board","Business Card (English)","Business Card (Gujarati)","Sticker (Vinyl)"];
 const dl=document.createElement('datalist'); dl.id='itemSuggestions';
 itemsList.forEach(i=>{let o=document.createElement('option');o.value=i;dl.appendChild(o);});
 document.body.appendChild(dl);
+
+/* ── Shared Utilities ── */
+function getItemRows(){ return DOM.tbody.querySelectorAll('tr'); }
+
+function formatFooterHtml(){
+  return `<p style="text-align:center;">${BIZ.nameGuj}<br>${BIZ.city}<br>મો.${BIZ.phone}</p>`;
+}
+
+function formatFooterText(){
+  return `${BIZ.nameGuj}\nમો.${BIZ.phone}`;
+}
+
+function formatSummary(e){
+  return {
+    total:`₹${e.total}`, advance:`₹${e.advance}`,
+    outstanding:`₹${e.outstanding}`, delivery:e.delivery
+  };
+}
 
 /* Table rows */
 function addRow(part='',qty=1,rate=0){
@@ -77,34 +114,35 @@ function addRow(part='',qty=1,rate=0){
   <td><input class="rate" type="number" value="${rate}" min="0"></td>
   <td class="amt">0.00</td>
   <td><button onclick="this.closest('tr').remove();recalc()" class="small">X</button></td>`;
-  document.querySelector('#itemsTable tbody').appendChild(tr);
+  DOM.tbody.appendChild(tr);
   tr.querySelectorAll('input').forEach(i=>i.addEventListener('input',recalc));
   recalc();
 }
 
 function recalc(){
   let total=0;
-  document.querySelectorAll('#itemsTable tbody tr').forEach(r=>{
+  getItemRows().forEach(r=>{
     const qty=+r.querySelector('.qty').value||0;
     const rate=+r.querySelector('.rate').value||0;
     const amt=qty*rate;
     r.querySelector('.amt').innerText=amt.toFixed(2);
     total+=amt;
   });
-  document.getElementById('total').innerText=total.toFixed(2);
-  const adv=+document.getElementById('advance').value||0;
-  document.getElementById('out').innerText=(total-adv).toFixed(2);
+  DOM.total.innerText=total.toFixed(2);
+  const adv=+DOM.advance.value||0;
+  DOM.out.innerText=(total-adv).toFixed(2);
 }
-document.getElementById('advance').addEventListener('input',recalc);
+DOM.advance.addEventListener('input',recalc);
 addRow();
 
 /* Helpers */
 function nextEstimateId(){return String(Date.now());}
-document.getElementById('estNo').value=nextEstimateId();
+DOM.estNo.value=nextEstimateId();
 
 function buildCurrent(){
+  recalc();
   const items=[];
-  document.querySelectorAll('#itemsTable tbody tr').forEach(r=>{
+  getItemRows().forEach(r=>{
     items.push({
       part:r.querySelector('.part').value,
       qty:r.querySelector('.qty').value,
@@ -113,13 +151,13 @@ function buildCurrent(){
     });
   });
   return {
-    estNo:document.getElementById('estNo').value,
-    customer:document.getElementById('custName').value,
-    phone:document.getElementById('phone').value,
-    delivery:document.getElementById('delivery').value,
-    total:document.getElementById('total').innerText,
-    advance:document.getElementById('advance').value,
-    outstanding:document.getElementById('out').innerText,
+    estNo:DOM.estNo.value,
+    customer:DOM.custName.value,
+    phone:DOM.phone.value,
+    delivery:DOM.delivery.value,
+    total:DOM.total.innerText,
+    advance:DOM.advance.value,
+    outstanding:DOM.out.innerText,
     items
   };
 }
@@ -138,29 +176,29 @@ function saveOnline(){
 
 /* Print */
 function printEstimate(){
-  recalc();
   const e=buildCurrent();
+  const s=formatSummary(e);
   const w=window.open('','','width=900,height=1000');
   let h=`<html><head><meta charset="utf-8"><title>Estimate #${e.estNo}</title></head>
   <body style="font-family:Arial;padding:20px;">`;
-  h+=`<h2 style="text-align:center;">MOHAMMADI PRINTING PRESS - KHAMBHAT</h2>`;
-  h+=`<p><b>Estimate No:</b> ${e.estNo}<br><b>Customer:</b> ${e.customer}<br><b>Phone:</b> ${e.phone}<br><b>Delivery:</b> ${e.delivery}</p>`;
+  h+=`<h2 style="text-align:center;">${BIZ.name}</h2>`;
+  h+=`<p><b>Estimate No:</b> ${e.estNo}<br><b>Customer:</b> ${e.customer}<br><b>Phone:</b> ${e.phone}<br><b>Delivery:</b> ${s.delivery}</p>`;
   h+=`<table style="width:100%;border-collapse:collapse;" border="1"><tr><th>Particulars</th><th>Qty</th><th>Rate ₹</th><th>Amount ₹</th></tr>`;
   (e.items||[]).forEach(it=>h+=`<tr><td>${it.part}</td><td>${it.qty}</td><td>${it.rate}</td><td>${it.amt}</td></tr>`);
-  h+=`</table><p><b>Total:</b> ₹${e.total}<br><b>Advance:</b> ₹${e.advance}<br><b>Outstanding:</b> ₹${e.outstanding}</p>`;
-  h+=`<hr><p style="text-align:center;">મોહંમદી પ્રિન્ટીંગ પ્રેસ<br>ખંભાત - 388620<br>મો.9825547625</p></body></html>`;
+  h+=`</table><p><b>Total:</b> ${s.total}<br><b>Advance:</b> ${s.advance}<br><b>Outstanding:</b> ${s.outstanding}</p>`;
+  h+=`<hr>${formatFooterHtml()}</body></html>`;
   w.document.write(h); w.document.close(); w.print();
 }
 
 /* WhatsApp */
 function openWhatsApp(){
-  recalc();
   const e=buildCurrent();
   const p=(e.phone||'').replace(/\D/g,'');
   if(!p){alert('Enter valid phone number'); return;}
-  let m=`*MOHAMMADI PRINTING PRESS - KHAMBHAT*\n*Estimate #${e.estNo}*\n*Customer:* ${e.customer}\n`;
+  const s=formatSummary(e);
+  let m=`*${BIZ.name}*\n*Estimate #${e.estNo}*\n*Customer:* ${e.customer}\n`;
   (e.items||[]).forEach(it=>m+=`• ${it.part} | Qty:${it.qty} | Rate:₹${it.rate} | Amt:₹${it.amt}\n`);
-  m+=`\n*Total:* ₹${e.total}\n*Advance:* ₹${e.advance}\n*Outstanding:* ₹${e.outstanding}\n*Delivery:* ${e.delivery}\n\nમોહંમદી પ્રિન્ટીંગ પ્રેસ\nમો.9825547625`;
+  m+=`\n*Total:* ${s.total}\n*Advance:* ${s.advance}\n*Outstanding:* ${s.outstanding}\n*Delivery:* ${s.delivery}\n\n${formatFooterText()}`;
   window.open(`https://wa.me/${p}?text=${encodeURIComponent(m)}`,'_blank');
 }
 </script>
