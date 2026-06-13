@@ -61,7 +61,7 @@ button.warn{background:#f39c12;}
 </div>
 
 <script>
-const SCRIPT_URL="https://script.google.com/macros/s/AKfycbwDcUzHKb6Nboc1Fs2lxufGq1wpROoH149X-ZwmW3178HOCLLFGPkOw32BrJv5rFWt6jQ/exec
+const SCRIPT_URL="https://script.google.com/macros/s/AKfycbwDcUzHKb6Nboc1Fs2lxufGq1wpROoH149X-ZwmW3178HOCLLFGPkOw32BrJv5rFWt6jQ/exec";
 
 /* Items suggestions */
 const itemsList=["Bill Book","Visiting Card","Flex Banner","Sticker","Invitation Card","Letterhead","Receipt Book","ID Card","Vinyl Printing","Pamphlet","Poster","Envelope","Glow Sign Board","Business Card (English)","Business Card (Gujarati)","Sticker (Vinyl)"];
@@ -128,12 +128,23 @@ function buildCurrent(){
 function saveOnline(){
   const data=buildCurrent();
   if(!data.customer){alert('Enter Customer Name');return;}
+  const btn=document.querySelector('button[onclick="saveOnline()"]');
+  if(btn){btn.disabled=true;btn.textContent='⏳ Saving…';}
   fetch(SCRIPT_URL,{
     method:'POST',
     body:JSON.stringify(data)
-  }).then(r=>r.json())
-  .then(res=>alert(res.message||'✅ Saved successfully'))
-  .catch(e=>alert('❌ Error: '+e));
+  }).then(function(r){
+    if(!r.ok) throw new Error('Server returned '+r.status+' '+r.statusText);
+    return r.text();
+  }).then(function(text){
+    try{ var res=JSON.parse(text); }catch(_){ alert('✅ '+text); return; }
+    alert(res.message||'✅ Saved successfully');
+  }).catch(function(e){
+    console.error('saveOnline failed:',e);
+    alert('❌ Save failed: '+(e.message||e));
+  }).finally(function(){
+    if(btn){btn.disabled=false;btn.textContent='💾 Save (Online)';}
+  });
 }
 
 /* Print */
@@ -141,6 +152,7 @@ function printEstimate(){
   recalc();
   const e=buildCurrent();
   const w=window.open('','','width=900,height=1000');
+  if(!w){alert('⚠️ Popup blocked! Please allow popups for this site to print.');return;}
   let h=`<html><head><meta charset="utf-8"><title>Estimate #${e.estNo}</title></head>
   <body style="font-family:Arial;padding:20px;">`;
   h+=`<h2 style="text-align:center;">MOHAMMADI PRINTING PRESS - KHAMBHAT</h2>`;
@@ -157,12 +169,20 @@ function openWhatsApp(){
   recalc();
   const e=buildCurrent();
   const p=(e.phone||'').replace(/\D/g,'');
-  if(!p){alert('Enter valid phone number'); return;}
+  if(!p||p.length<10){alert('Enter a valid phone number (at least 10 digits)'); return;}
   let m=`*MOHAMMADI PRINTING PRESS - KHAMBHAT*\n*Estimate #${e.estNo}*\n*Customer:* ${e.customer}\n`;
   (e.items||[]).forEach(it=>m+=`• ${it.part} | Qty:${it.qty} | Rate:₹${it.rate} | Amt:₹${it.amt}\n`);
   m+=`\n*Total:* ₹${e.total}\n*Advance:* ₹${e.advance}\n*Outstanding:* ₹${e.outstanding}\n*Delivery:* ${e.delivery}\n\nમોહંમદી પ્રિન્ટીંગ પ્રેસ\nમો.9825547625`;
-  window.open(`https://wa.me/${p}?text=${encodeURIComponent(m)}`,'_blank');
+  const wa=window.open(`https://wa.me/${p}?text=${encodeURIComponent(m)}`,'_blank');
+  if(!wa){alert('⚠️ Popup blocked! Please allow popups for this site to open WhatsApp.');}
 }
+/* Global error handler */
+window.addEventListener('error',function(ev){
+  console.error('Uncaught error:',ev.error||ev.message);
+});
+window.addEventListener('unhandledrejection',function(ev){
+  console.error('Unhandled promise rejection:',ev.reason);
+});
 </script>
 </body>
 </html>
