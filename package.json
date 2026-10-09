@@ -1,0 +1,13 @@
+{
+  "name": "estimate-new",
+  "version": "1.0.0",
+  "description": "MOHAMMADI PRINTING PRESS – Estimate Tool",
+  "scripts": {
+    "test": "jest --coverage",
+    "test:watch": "jest --watch"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0"
+  }
+}
